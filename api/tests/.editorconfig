@@ -1,0 +1,10 @@
+[*.cs]
+# Test names read better as Method_Condition_Result.
+dotnet_diagnostic.CA1707.severity = none
+# Relative string URLs are fine for HttpClient in tests.
+dotnet_diagnostic.CA2234.severity = none
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA1001.severity = none
+dotnet_diagnostic.CA1063.severity = none
+dotnet_diagnostic.CA1816.severity = none
+dotnet_diagnostic.CA2000.severity = none

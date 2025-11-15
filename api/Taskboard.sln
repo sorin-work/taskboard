@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskboard.Api", "src\Taskboard.Api\Taskboard.Api.csproj", "{F2135173-0DD7-44D8-9E8A-F3AAEC4EE091}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskboard.Api.Tests", "tests\Taskboard.Api.Tests\Taskboard.Api.Tests.csproj", "{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,11 +33,24 @@ Global
 		{F2135173-0DD7-44D8-9E8A-F3AAEC4EE091}.Release|x64.Build.0 = Release|Any CPU
 		{F2135173-0DD7-44D8-9E8A-F3AAEC4EE091}.Release|x86.ActiveCfg = Release|Any CPU
 		{F2135173-0DD7-44D8-9E8A-F3AAEC4EE091}.Release|x86.Build.0 = Release|Any CPU
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}.Debug|x64.Build.0 = Debug|Any CPU
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}.Debug|x86.Build.0 = Debug|Any CPU
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}.Release|x64.ActiveCfg = Release|Any CPU
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}.Release|x64.Build.0 = Release|Any CPU
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}.Release|x86.ActiveCfg = Release|Any CPU
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F2135173-0DD7-44D8-9E8A-F3AAEC4EE091} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{7FCB9753-6BAA-46A8-83CA-6B674D7D0396} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal
