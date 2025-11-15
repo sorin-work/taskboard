@@ -1,0 +1,46 @@
+# .NET build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.userprefs
+.vs/
+*.rsuser
+TestResults/
+*.trx
+coverage/
+*.coverage
+*.coveragexml
+artifacts/
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/*
+!.vscode/extensions.json
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+npm-debug.log*
+.eslintcache
+.vite/
+vite.config.ts.timestamp-*
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
