@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Identity;
+using Taskboard.Api.Auth;
 using Taskboard.Api.Common;
 using Taskboard.Api.Data;
-using Taskboard.Api.Domain;
 using Taskboard.Api.Features.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,12 +10,14 @@ builder.Services.AddProblemDetails(options =>
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.AddTaskboardDatabase(builder.Configuration);
 builder.Services.AddSingleton(TimeProvider.System);
-builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddTaskboardAuth(builder.Configuration);
 
 var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseAuthentication();
+app.UseAuthorization();
 
 await app.MigrateDatabaseAsync();
 

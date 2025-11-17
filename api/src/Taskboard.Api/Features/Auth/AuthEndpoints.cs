@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Taskboard.Api.Auth;
@@ -14,6 +15,8 @@ public static class AuthEndpoints
         var group = app.MapGroup("/api/auth").WithTags("Auth");
 
         group.MapPost("/signup", SignupAsync);
+        group.MapPost("/login", LoginAsync);
+        group.MapGet("/me", GetMeAsync).RequireAuthorization();
 
         return app;
     }
@@ -22,6 +25,7 @@ public static class AuthEndpoints
         SignupRequest request,
         TaskboardDbContext db,
         IPasswordHasher<User> hasher,
+        TokenService tokens,
         TimeProvider clock,
         CancellationToken ct)
     {
@@ -43,6 +47,31 @@ public static class AuthEndpoints
         db.Users.Add(user);
         await db.SaveChangesAsync(ct);
 
-        return Results.Created("/api/auth/me", UserDto.From(user));
+        return Results.Created("/api/auth/me", new AuthResponse(tokens.CreateToken(user), UserDto.From(user)));
+    }
+
+    private static async Task<AuthResponse> LoginAsync(
+        LoginRequest request,
+        TaskboardDbContext db,
+        IPasswordHasher<User> hasher,
+        TokenService tokens,
+        CancellationToken ct)
+    {
+        var email = EmailAddress.Normalize(request.Email);
+        var user = await db.Users.SingleOrDefaultAsync(u => u.Email == email, ct);
+        if (user is null || hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
+        {
+            throw new UnauthorizedException("Invalid email or password.");
+        }
+
+        return new AuthResponse(tokens.CreateToken(user), UserDto.From(user));
+    }
+
+    private static async Task<UserDto> GetMeAsync(ClaimsPrincipal principal, TaskboardDbContext db, CancellationToken ct)
+    {
+        var userId = principal.GetUserId();
+        var user = await db.Users.FindAsync([userId], ct)
+            ?? throw new UnauthorizedException("Your account no longer exists.");
+        return UserDto.From(user);
     }
 }
