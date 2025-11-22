@@ -95,4 +95,17 @@ public class AuthTests(TaskboardApiFactory factory) : IClassFixture<TaskboardApi
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
+
+    [Theory]
+    [InlineData("not-an-email", "long-enough-password", "Name", "Email")]
+    [InlineData("short@example.com", "short", "Name", "Password")]
+    [InlineData("noname@example.com", "long-enough-password", "", "DisplayName")]
+    public async Task Signup_WithInvalidInput_ReturnsValidationProblem(string email, string password, string name, string field)
+    {
+        var response = await _client.PostAsJsonAsync("/api/auth/signup", new SignupRequest(email, password, name));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var problem = await response.ReadAsAsync<ValidationProblemDetails>();
+        problem.Errors.Should().ContainKey(field);
+    }
 }

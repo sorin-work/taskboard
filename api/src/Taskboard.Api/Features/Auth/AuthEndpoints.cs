@@ -14,8 +14,8 @@ public static class AuthEndpoints
     {
         var group = app.MapGroup("/api/auth").WithTags("Auth");
 
-        group.MapPost("/signup", SignupAsync);
-        group.MapPost("/login", LoginAsync);
+        group.MapPost("/signup", SignupAsync).Validate<SignupRequest>();
+        group.MapPost("/login", LoginAsync).Validate<LoginRequest>();
         group.MapGet("/me", GetMeAsync).RequireAuthorization();
 
         return app;
