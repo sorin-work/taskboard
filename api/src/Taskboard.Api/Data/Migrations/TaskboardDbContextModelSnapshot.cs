@@ -60,6 +60,84 @@ namespace Taskboard.Api.Data.Migrations
 
                     b.ToTable("users", (string)null);
                 });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.Workspace", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_workspaces");
+
+                    b.ToTable("workspaces", (string)null);
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.WorkspaceMember", b =>
+                {
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("workspace_id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("joined_at");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("role");
+
+                    b.HasKey("WorkspaceId", "UserId")
+                        .HasName("pk_workspace_members");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_workspace_members_user_id");
+
+                    b.ToTable("workspace_members", (string)null);
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.WorkspaceMember", b =>
+                {
+                    b.HasOne("Taskboard.Api.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_workspace_members_users_user_id");
+
+                    b.HasOne("Taskboard.Api.Domain.Workspace", "Workspace")
+                        .WithMany("Members")
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_workspace_members_workspaces_workspace_id");
+
+                    b.Navigation("User");
+
+                    b.Navigation("Workspace");
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.Workspace", b =>
+                {
+                    b.Navigation("Members");
+                });
 #pragma warning restore 612, 618
         }
     }
