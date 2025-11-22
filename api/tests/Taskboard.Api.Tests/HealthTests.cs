@@ -1,10 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
+using Taskboard.Api.Tests.Infrastructure;
 
 namespace Taskboard.Api.Tests;
 
-public class HealthTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class HealthTests(TaskboardApiFactory factory) : IClassFixture<TaskboardApiFactory>
 {
     [Fact]
     public async Task Health_ReturnsOk()
