@@ -17,3 +17,11 @@ public sealed class UpdateWorkspaceRequestValidator : AbstractValidator<UpdateWo
         RuleFor(r => r.Name).NotEmpty().MaximumLength(80);
     }
 }
+
+public sealed class UpdateMemberRequestValidator : AbstractValidator<UpdateMemberRequest>
+{
+    public UpdateMemberRequestValidator()
+    {
+        RuleFor(r => r.Role).IsInEnum();
+    }
+}

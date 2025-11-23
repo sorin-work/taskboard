@@ -32,6 +32,7 @@ await app.MigrateDatabaseAsync();
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
 app.MapWorkspaceEndpoints();
+app.MapMemberEndpoints();
 
 await app.RunAsync();
 
