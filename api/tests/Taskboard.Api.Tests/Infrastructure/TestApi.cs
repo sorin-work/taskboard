@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Taskboard.Api.Domain;
 using Taskboard.Api.Features.Workspaces;
 
 namespace Taskboard.Api.Tests.Infrastructure;
@@ -11,5 +12,21 @@ public static class TestApi
         var response = await client.PostAsJsonAsync("/api/workspaces", new CreateWorkspaceRequest(name));
         response.EnsureSuccessStatusCode();
         return await response.ReadAsAsync<WorkspaceDto>();
+    }
+
+    /// <summary>Adds a user straight to a workspace, skipping the invitation flow.</summary>
+    public static void AddMember(this TaskboardApiFactory factory, Guid workspaceId, Guid userId, WorkspaceRole role = WorkspaceRole.Member)
+    {
+        factory.WithDb(db =>
+        {
+            db.WorkspaceMembers.Add(new WorkspaceMember
+            {
+                WorkspaceId = workspaceId,
+                UserId = userId,
+                Role = role,
+                JoinedAt = DateTime.UtcNow,
+            });
+            return db.SaveChanges();
+        });
     }
 }
