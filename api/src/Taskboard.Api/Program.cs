@@ -5,6 +5,7 @@ using Taskboard.Api.Auth;
 using Taskboard.Api.Common;
 using Taskboard.Api.Data;
 using Taskboard.Api.Features.Auth;
+using Taskboard.Api.Features.Invitations;
 using Taskboard.Api.Features.Workspaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddTaskboardAuth(builder.Configuration);
 builder.Services.AddScoped<WorkspaceAccess>();
+builder.Services.AddSingleton<IInvitationNotifier, LoggingInvitationNotifier>();
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
 
@@ -33,6 +35,7 @@ app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
 app.MapWorkspaceEndpoints();
 app.MapMemberEndpoints();
+app.MapInvitationEndpoints();
 
 await app.RunAsync();
 
