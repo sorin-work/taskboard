@@ -30,3 +30,9 @@ public sealed record BoardDto(
     DateTime? ArchivedAt,
     IReadOnlyList<ColumnDto> Columns,
     IReadOnlyList<BoardMemberDto> Members);
+
+public sealed record CreateColumnRequest(string Name);
+
+public sealed record UpdateColumnRequest(string Name);
+
+public sealed record MoveColumnRequest(int Position);

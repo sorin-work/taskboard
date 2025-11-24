@@ -38,6 +38,7 @@ app.MapWorkspaceEndpoints();
 app.MapMemberEndpoints();
 app.MapInvitationEndpoints();
 app.MapBoardEndpoints();
+app.MapColumnEndpoints();
 
 await app.RunAsync();
 

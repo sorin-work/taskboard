@@ -21,3 +21,27 @@ public sealed class UpdateBoardRequestValidator : AbstractValidator<UpdateBoardR
         RuleFor(r => r.Description).MaximumLength(2000);
     }
 }
+
+public sealed class CreateColumnRequestValidator : AbstractValidator<CreateColumnRequest>
+{
+    public CreateColumnRequestValidator()
+    {
+        RuleFor(r => r.Name).NotEmpty().MaximumLength(60);
+    }
+}
+
+public sealed class UpdateColumnRequestValidator : AbstractValidator<UpdateColumnRequest>
+{
+    public UpdateColumnRequestValidator()
+    {
+        RuleFor(r => r.Name).NotEmpty().MaximumLength(60);
+    }
+}
+
+public sealed class MoveColumnRequestValidator : AbstractValidator<MoveColumnRequest>
+{
+    public MoveColumnRequestValidator()
+    {
+        RuleFor(r => r.Position).GreaterThanOrEqualTo(0);
+    }
+}
