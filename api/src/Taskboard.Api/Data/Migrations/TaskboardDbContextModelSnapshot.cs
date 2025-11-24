@@ -22,6 +22,76 @@ namespace Taskboard.Api.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Taskboard.Api.Domain.Board", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("archived_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("workspace_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_boards");
+
+                    b.HasIndex("WorkspaceId")
+                        .HasDatabaseName("ix_boards_workspace_id");
+
+                    b.ToTable("boards", (string)null);
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.BoardColumn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("board_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
+                    b.HasKey("Id")
+                        .HasName("pk_board_columns");
+
+                    b.HasIndex("BoardId", "Position")
+                        .HasDatabaseName("ix_board_columns_board_id_position");
+
+                    b.ToTable("board_columns", (string)null);
+                });
+
             modelBuilder.Entity("Taskboard.Api.Domain.Invitation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -178,6 +248,30 @@ namespace Taskboard.Api.Data.Migrations
                     b.ToTable("workspace_members", (string)null);
                 });
 
+            modelBuilder.Entity("Taskboard.Api.Domain.Board", b =>
+                {
+                    b.HasOne("Taskboard.Api.Domain.Workspace", "Workspace")
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_boards_workspaces_workspace_id");
+
+                    b.Navigation("Workspace");
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.BoardColumn", b =>
+                {
+                    b.HasOne("Taskboard.Api.Domain.Board", "Board")
+                        .WithMany("Columns")
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_board_columns_boards_board_id");
+
+                    b.Navigation("Board");
+                });
+
             modelBuilder.Entity("Taskboard.Api.Domain.Invitation", b =>
                 {
                     b.HasOne("Taskboard.Api.Domain.User", "InvitedBy")
@@ -218,6 +312,11 @@ namespace Taskboard.Api.Data.Migrations
                     b.Navigation("User");
 
                     b.Navigation("Workspace");
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.Board", b =>
+                {
+                    b.Navigation("Columns");
                 });
 
             modelBuilder.Entity("Taskboard.Api.Domain.Workspace", b =>

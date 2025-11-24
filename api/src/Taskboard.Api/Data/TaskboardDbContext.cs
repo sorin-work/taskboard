@@ -13,6 +13,10 @@ public class TaskboardDbContext(DbContextOptions<TaskboardDbContext> options) : 
 
     public DbSet<Invitation> Invitations => Set<Invitation>();
 
+    public DbSet<Board> Boards => Set<Board>();
+
+    public DbSet<BoardColumn> Columns => Set<BoardColumn>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TaskboardDbContext).Assembly);
