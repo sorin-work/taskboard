@@ -17,6 +17,8 @@ public class TaskboardDbContext(DbContextOptions<TaskboardDbContext> options) : 
 
     public DbSet<BoardColumn> Columns => Set<BoardColumn>();
 
+    public DbSet<Card> Cards => Set<Card>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TaskboardDbContext).Assembly);

@@ -92,6 +92,64 @@ namespace Taskboard.Api.Data.Migrations
                     b.ToTable("board_columns", (string)null);
                 });
 
+            modelBuilder.Entity("Taskboard.Api.Domain.Card", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("board_id");
+
+                    b.Property<Guid>("ColumnId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("column_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(10000)
+                        .HasColumnType("character varying(10000)")
+                        .HasColumnName("description");
+
+                    b.Property<long>("Position")
+                        .HasColumnType("bigint")
+                        .HasColumnName("position");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_cards");
+
+                    b.HasIndex("BoardId")
+                        .HasDatabaseName("ix_cards_board_id");
+
+                    b.HasIndex("CreatedById")
+                        .HasDatabaseName("ix_cards_created_by_id");
+
+                    b.HasIndex("ColumnId", "Position")
+                        .HasDatabaseName("ix_cards_column_id_position");
+
+                    b.ToTable("cards", (string)null);
+                });
+
             modelBuilder.Entity("Taskboard.Api.Domain.Invitation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -270,6 +328,36 @@ namespace Taskboard.Api.Data.Migrations
                         .HasConstraintName("fk_board_columns_boards_board_id");
 
                     b.Navigation("Board");
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.Card", b =>
+                {
+                    b.HasOne("Taskboard.Api.Domain.Board", "Board")
+                        .WithMany()
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_cards_boards_board_id");
+
+                    b.HasOne("Taskboard.Api.Domain.BoardColumn", "Column")
+                        .WithMany()
+                        .HasForeignKey("ColumnId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_cards_columns_column_id");
+
+                    b.HasOne("Taskboard.Api.Domain.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_cards_users_created_by_id");
+
+                    b.Navigation("Board");
+
+                    b.Navigation("Column");
+
+                    b.Navigation("CreatedBy");
                 });
 
             modelBuilder.Entity("Taskboard.Api.Domain.Invitation", b =>
