@@ -25,6 +25,25 @@ public sealed class WorkspaceAccess(TaskboardDbContext db)
         return member;
     }
 
+    public async Task<(Board Board, WorkspaceMember Member)> RequireBoardAsync(
+        Guid boardId,
+        Guid userId,
+        WorkspaceRole minimum = WorkspaceRole.Member,
+        CancellationToken ct = default)
+    {
+        var board = await db.Boards.SingleOrDefaultAsync(b => b.Id == boardId, ct);
+        var member = board is null
+            ? null
+            : await db.WorkspaceMembers.SingleOrDefaultAsync(m => m.WorkspaceId == board.WorkspaceId && m.UserId == userId, ct);
+        if (board is null || member is null)
+        {
+            throw new NotFoundException("Board not found.");
+        }
+
+        EnsureRole(member, minimum);
+        return (board, member);
+    }
+
     public static void EnsureRole(WorkspaceMember member, WorkspaceRole minimum)
     {
         if (member.Role < minimum)
