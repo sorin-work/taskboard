@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using Taskboard.Api.Domain;
+using Taskboard.Api.Features.Boards;
 using Taskboard.Api.Features.Workspaces;
 
 namespace Taskboard.Api.Tests.Infrastructure;
@@ -28,5 +29,13 @@ public static class TestApi
             });
             return db.SaveChanges();
         });
+    }
+
+    public static async Task<BoardDto> CreateBoardAsync(this HttpClient client, Guid workspaceId, string name = "Roadmap", params string[] columns)
+    {
+        var response = await client.PostAsJsonAsync($"/api/workspaces/{workspaceId}/boards",
+            new CreateBoardRequest(name, null, columns.Length > 0 ? columns : null));
+        response.EnsureSuccessStatusCode();
+        return await response.ReadAsAsync<BoardDto>();
     }
 }
