@@ -22,6 +22,7 @@ public static class CardEndpoints
         card.MapGet("/", GetAsync);
         card.MapPut("/", UpdateAsync).Validate<UpdateCardRequest>();
         card.MapDelete("/", DeleteAsync);
+        card.MapPost("/move", MoveAsync).Validate<MoveCardRequest>();
 
         return app;
     }
@@ -118,6 +119,48 @@ public static class CardEndpoints
         db.Cards.Remove(card);
         await db.SaveChangesAsync(ct);
         return Results.NoContent();
+    }
+
+    private static async Task<CardDto> MoveAsync(
+        Guid cardId,
+        MoveCardRequest request,
+        ClaimsPrincipal principal,
+        WorkspaceAccess access,
+        TaskboardDbContext db,
+        TimeProvider clock,
+        CancellationToken ct)
+    {
+        var (card, _) = await access.RequireCardAsync(cardId, principal.GetUserId(), ct: ct);
+        var column = await db.Columns.SingleOrDefaultAsync(c => c.Id == request.ColumnId && c.BoardId == card.BoardId, ct)
+            ?? throw new BadRequestException("The target column is not on this card's board.");
+
+        var siblings = await db.Cards
+            .Where(c => c.ColumnId == column.Id && c.Id != card.Id)
+            .OrderBy(c => c.Position)
+            .ThenBy(c => c.CreatedAt)
+            .ToListAsync(ct);
+
+        var index = 0;
+        if (request.AfterCardId is { } afterId)
+        {
+            var afterIndex = siblings.FindIndex(c => c.Id == afterId);
+            if (afterIndex < 0)
+            {
+                throw new BadRequestException("The card to place this one after is not in the target column.");
+            }
+
+            index = afterIndex + 1;
+        }
+
+        long? before = index > 0 ? siblings[index - 1].Position : null;
+        long? after = index < siblings.Count ? siblings[index].Position : null;
+
+        card.ColumnId = column.Id;
+        card.Position = CardPositions.Between(before, after);
+        card.UpdatedAt = clock.GetUtcNow().UtcDateTime;
+        await db.SaveChangesAsync(ct);
+
+        return await LoadCardAsync(db, cardId, ct);
     }
 
     internal static async Task<CardDto> LoadCardAsync(TaskboardDbContext db, Guid cardId, CancellationToken ct)

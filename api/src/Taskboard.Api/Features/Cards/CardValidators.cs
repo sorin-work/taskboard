@@ -18,3 +18,11 @@ public sealed class UpdateCardRequestValidator : AbstractValidator<UpdateCardReq
         RuleFor(r => r.Description).MaximumLength(10000);
     }
 }
+
+public sealed class MoveCardRequestValidator : AbstractValidator<MoveCardRequest>
+{
+    public MoveCardRequestValidator()
+    {
+        RuleFor(r => r.ColumnId).NotEmpty();
+    }
+}
