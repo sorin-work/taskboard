@@ -44,6 +44,25 @@ public sealed class WorkspaceAccess(TaskboardDbContext db)
         return (board, member);
     }
 
+    public async Task<(Card Card, WorkspaceMember Member)> RequireCardAsync(
+        Guid cardId,
+        Guid userId,
+        WorkspaceRole minimum = WorkspaceRole.Member,
+        CancellationToken ct = default)
+    {
+        var card = await db.Cards.Include(c => c.Board).SingleOrDefaultAsync(c => c.Id == cardId, ct);
+        var member = card is null
+            ? null
+            : await db.WorkspaceMembers.SingleOrDefaultAsync(m => m.WorkspaceId == card.Board.WorkspaceId && m.UserId == userId, ct);
+        if (card is null || member is null)
+        {
+            throw new NotFoundException("Card not found.");
+        }
+
+        EnsureRole(member, minimum);
+        return (card, member);
+    }
+
     public static void EnsureRole(WorkspaceMember member, WorkspaceRole minimum)
     {
         if (member.Role < minimum)

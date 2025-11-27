@@ -6,6 +6,7 @@ using Taskboard.Api.Common;
 using Taskboard.Api.Data;
 using Taskboard.Api.Features.Auth;
 using Taskboard.Api.Features.Boards;
+using Taskboard.Api.Features.Cards;
 using Taskboard.Api.Features.Invitations;
 using Taskboard.Api.Features.Workspaces;
 
@@ -39,6 +40,7 @@ app.MapMemberEndpoints();
 app.MapInvitationEndpoints();
 app.MapBoardEndpoints();
 app.MapColumnEndpoints();
+app.MapCardEndpoints();
 
 await app.RunAsync();
 
