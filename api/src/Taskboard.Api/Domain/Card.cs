@@ -19,6 +19,10 @@ public class Card
     /// <summary>Sort key within the column. Gaps are intentional, see CardPositions.</summary>
     public long Position { get; set; }
 
+    public DateOnly? DueDate { get; set; }
+
+    public DateTime? CompletedAt { get; set; }
+
     public Guid CreatedById { get; set; }
 
     public User CreatedBy { get; set; } = null!;

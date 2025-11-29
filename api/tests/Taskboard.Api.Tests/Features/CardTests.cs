@@ -160,4 +160,38 @@ public class CardTests(TaskboardApiFactory factory) : IClassFixture<TaskboardApi
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+
+    [Fact]
+    public async Task Update_SetsAndClearsDueDate()
+    {
+        var (client, board) = await BoardAsync();
+        var card = await client.CreateCardAsync(board.Columns[0].Id);
+
+        var set = await (await client.PutAsJsonAsync($"/api/cards/{card.Id}",
+            new UpdateCardRequest(card.Title, null, new DateOnly(2026, 3, 14)))).ReadAsAsync<CardDto>();
+        var cleared = await (await client.PutAsJsonAsync($"/api/cards/{card.Id}",
+            new UpdateCardRequest(card.Title, null))).ReadAsAsync<CardDto>();
+
+        set.DueDate.Should().Be(new DateOnly(2026, 3, 14));
+        cleared.DueDate.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Update_CompletingKeepsOriginalTimestamp()
+    {
+        var (client, board) = await BoardAsync();
+        var card = await client.CreateCardAsync(board.Columns[0].Id);
+
+        var done = await (await client.PutAsJsonAsync($"/api/cards/{card.Id}",
+            new UpdateCardRequest(card.Title, null, Completed: true))).ReadAsAsync<CardDto>();
+        var again = await (await client.PutAsJsonAsync($"/api/cards/{card.Id}",
+            new UpdateCardRequest("Still done", null, Completed: true))).ReadAsAsync<CardDto>();
+        var reopened = await (await client.PutAsJsonAsync($"/api/cards/{card.Id}",
+            new UpdateCardRequest("Reopened", null, Completed: false))).ReadAsAsync<CardDto>();
+
+        done.CompletedAt.Should().NotBeNull();
+        again.CompletedAt.Should().Be(done.CompletedAt);
+        reopened.CompletedAt.Should().BeNull();
+        (await client.GetCardsAsync(board.Id)).Single().Completed.Should().BeFalse();
+    }
 }

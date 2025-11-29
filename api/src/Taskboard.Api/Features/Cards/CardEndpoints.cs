@@ -40,7 +40,7 @@ public static class CardEndpoints
             .OrderBy(c => c.Column.Position)
             .ThenBy(c => c.Position)
             .ThenBy(c => c.CreatedAt)
-            .Select(c => new CardSummaryDto(c.Id, c.ColumnId, c.Title, c.Position))
+            .Select(c => new CardSummaryDto(c.Id, c.ColumnId, c.Title, c.Position, c.DueDate, c.CompletedAt != null))
             .ToListAsync(ct);
     }
 
@@ -103,7 +103,14 @@ public static class CardEndpoints
         var (card, _) = await access.RequireCardAsync(cardId, principal.GetUserId(), ct: ct);
         card.Title = request.Title.Trim();
         card.Description = request.Description?.Trim() ?? string.Empty;
-        card.UpdatedAt = clock.GetUtcNow().UtcDateTime;
+        card.DueDate = request.DueDate;
+        var now = clock.GetUtcNow().UtcDateTime;
+        if (request.Completed != (card.CompletedAt is not null))
+        {
+            card.CompletedAt = request.Completed ? now : null;
+        }
+
+        card.UpdatedAt = now;
         await db.SaveChangesAsync(ct);
         return await LoadCardAsync(db, cardId, ct);
     }
@@ -175,6 +182,8 @@ public static class CardEndpoints
                 c.Title,
                 c.Description,
                 c.Position,
+                c.DueDate,
+                c.CompletedAt,
                 new CardUserDto(c.CreatedById, c.CreatedBy.DisplayName),
                 c.CreatedAt,
                 c.UpdatedAt))

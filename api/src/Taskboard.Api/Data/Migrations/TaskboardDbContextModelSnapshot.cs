@@ -107,6 +107,10 @@ namespace Taskboard.Api.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("column_id");
 
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -120,6 +124,10 @@ namespace Taskboard.Api.Data.Migrations
                         .HasMaxLength(10000)
                         .HasColumnType("character varying(10000)")
                         .HasColumnName("description");
+
+                    b.Property<DateOnly?>("DueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
 
                     b.Property<long>("Position")
                         .HasColumnType("bigint")
