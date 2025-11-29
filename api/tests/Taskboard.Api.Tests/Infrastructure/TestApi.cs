@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using Taskboard.Api.Domain;
 using Taskboard.Api.Features.Boards;
+using Taskboard.Api.Features.Cards;
 using Taskboard.Api.Features.Workspaces;
 
 namespace Taskboard.Api.Tests.Infrastructure;
@@ -38,4 +39,20 @@ public static class TestApi
         response.EnsureSuccessStatusCode();
         return await response.ReadAsAsync<BoardDto>();
     }
+
+    public static async Task<CardDto> CreateCardAsync(this HttpClient client, Guid columnId, string title = "Card")
+    {
+        var response = await client.PostAsJsonAsync($"/api/columns/{columnId}/cards", new CreateCardRequest(title));
+        response.EnsureSuccessStatusCode();
+        return await response.ReadAsAsync<CardDto>();
+    }
+
+    public static async Task<List<CardSummaryDto>> GetCardsAsync(this HttpClient client, Guid boardId, string query = "")
+    {
+        var cards = await client.GetFromJsonAsync<List<CardSummaryDto>>($"/api/boards/{boardId}/cards{query}", TestJson.Options);
+        return cards!;
+    }
+
+    public static async Task<HttpResponseMessage> MoveCardAsync(this HttpClient client, Guid cardId, Guid columnId, Guid? afterCardId) =>
+        await client.PostAsJsonAsync($"/api/cards/{cardId}/move", new MoveCardRequest(columnId, afterCardId));
 }
