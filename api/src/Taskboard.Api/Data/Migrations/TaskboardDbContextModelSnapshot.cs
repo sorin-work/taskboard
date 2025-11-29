@@ -158,6 +158,25 @@ namespace Taskboard.Api.Data.Migrations
                     b.ToTable("cards", (string)null);
                 });
 
+            modelBuilder.Entity("Taskboard.Api.Domain.CardLabel", b =>
+                {
+                    b.Property<Guid>("CardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("card_id");
+
+                    b.Property<Guid>("LabelId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("label_id");
+
+                    b.HasKey("CardId", "LabelId")
+                        .HasName("pk_card_labels");
+
+                    b.HasIndex("LabelId")
+                        .HasDatabaseName("ix_card_labels_label_id");
+
+                    b.ToTable("card_labels", (string)null);
+                });
+
             modelBuilder.Entity("Taskboard.Api.Domain.Invitation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -221,6 +240,38 @@ namespace Taskboard.Api.Data.Migrations
                         .HasDatabaseName("ix_invitations_workspace_id_email");
 
                     b.ToTable("invitations", (string)null);
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.Label", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("board_id");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("color");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_labels");
+
+                    b.HasIndex("BoardId")
+                        .HasDatabaseName("ix_labels_board_id");
+
+                    b.ToTable("labels", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Api.Domain.User", b =>
@@ -368,6 +419,27 @@ namespace Taskboard.Api.Data.Migrations
                     b.Navigation("CreatedBy");
                 });
 
+            modelBuilder.Entity("Taskboard.Api.Domain.CardLabel", b =>
+                {
+                    b.HasOne("Taskboard.Api.Domain.Card", "Card")
+                        .WithMany("Labels")
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_card_labels_cards_card_id");
+
+                    b.HasOne("Taskboard.Api.Domain.Label", "Label")
+                        .WithMany()
+                        .HasForeignKey("LabelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_card_labels_labels_label_id");
+
+                    b.Navigation("Card");
+
+                    b.Navigation("Label");
+                });
+
             modelBuilder.Entity("Taskboard.Api.Domain.Invitation", b =>
                 {
                     b.HasOne("Taskboard.Api.Domain.User", "InvitedBy")
@@ -387,6 +459,18 @@ namespace Taskboard.Api.Data.Migrations
                     b.Navigation("InvitedBy");
 
                     b.Navigation("Workspace");
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.Label", b =>
+                {
+                    b.HasOne("Taskboard.Api.Domain.Board", "Board")
+                        .WithMany()
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_labels_boards_board_id");
+
+                    b.Navigation("Board");
                 });
 
             modelBuilder.Entity("Taskboard.Api.Domain.WorkspaceMember", b =>
@@ -413,6 +497,11 @@ namespace Taskboard.Api.Data.Migrations
             modelBuilder.Entity("Taskboard.Api.Domain.Board", b =>
                 {
                     b.Navigation("Columns");
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.Card", b =>
+                {
+                    b.Navigation("Labels");
                 });
 
             modelBuilder.Entity("Taskboard.Api.Domain.Workspace", b =>

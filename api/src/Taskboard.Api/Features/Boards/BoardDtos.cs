@@ -1,4 +1,5 @@
 using Taskboard.Api.Domain;
+using Taskboard.Api.Features.Labels;
 
 namespace Taskboard.Api.Features.Boards;
 
@@ -29,6 +30,7 @@ public sealed record BoardDto(
     DateTime CreatedAt,
     DateTime? ArchivedAt,
     IReadOnlyList<ColumnDto> Columns,
+    IReadOnlyList<LabelDto> Labels,
     IReadOnlyList<BoardMemberDto> Members);
 
 public sealed record CreateColumnRequest(string Name);

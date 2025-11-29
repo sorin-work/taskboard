@@ -19,6 +19,10 @@ public class TaskboardDbContext(DbContextOptions<TaskboardDbContext> options) : 
 
     public DbSet<Card> Cards => Set<Card>();
 
+    public DbSet<Label> Labels => Set<Label>();
+
+    public DbSet<CardLabel> CardLabels => Set<CardLabel>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TaskboardDbContext).Assembly);

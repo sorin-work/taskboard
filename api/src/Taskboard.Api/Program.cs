@@ -8,6 +8,7 @@ using Taskboard.Api.Features.Auth;
 using Taskboard.Api.Features.Boards;
 using Taskboard.Api.Features.Cards;
 using Taskboard.Api.Features.Invitations;
+using Taskboard.Api.Features.Labels;
 using Taskboard.Api.Features.Workspaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +42,7 @@ app.MapInvitationEndpoints();
 app.MapBoardEndpoints();
 app.MapColumnEndpoints();
 app.MapCardEndpoints();
+app.MapLabelEndpoints();
 
 await app.RunAsync();
 

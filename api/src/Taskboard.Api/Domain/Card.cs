@@ -30,4 +30,6 @@ public class Card
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public List<CardLabel> Labels { get; set; } = [];
 }

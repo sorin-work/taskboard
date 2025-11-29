@@ -4,6 +4,7 @@ using Taskboard.Api.Auth;
 using Taskboard.Api.Common;
 using Taskboard.Api.Data;
 using Taskboard.Api.Domain;
+using Taskboard.Api.Features.Labels;
 using Taskboard.Api.Features.Workspaces;
 
 namespace Taskboard.Api.Features.Boards;
@@ -146,6 +147,7 @@ public static class BoardEndpoints
             board.CreatedAt,
             board.ArchivedAt,
             [.. board.Columns.OrderBy(c => c.Position).Select(c => new ColumnDto(c.Id, c.Name, c.Position))],
+            await LabelEndpoints.ForBoardAsync(db, board.Id, ct),
             members);
     }
 }
