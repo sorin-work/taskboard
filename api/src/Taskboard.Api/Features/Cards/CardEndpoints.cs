@@ -4,6 +4,7 @@ using Taskboard.Api.Auth;
 using Taskboard.Api.Common;
 using Taskboard.Api.Data;
 using Taskboard.Api.Domain;
+using Taskboard.Api.Features.Labels;
 using Taskboard.Api.Features.Workspaces;
 
 namespace Taskboard.Api.Features.Cards;
@@ -23,6 +24,8 @@ public static class CardEndpoints
         card.MapPut("/", UpdateAsync).Validate<UpdateCardRequest>();
         card.MapDelete("/", DeleteAsync);
         card.MapPost("/move", MoveAsync).Validate<MoveCardRequest>();
+        card.MapPut("/labels", SetLabelsAsync).Validate<SetCardLabelsRequest>();
+        card.MapPut("/assignees", SetAssigneesAsync).Validate<SetCardAssigneesRequest>();
 
         return app;
     }
@@ -40,7 +43,15 @@ public static class CardEndpoints
             .OrderBy(c => c.Column.Position)
             .ThenBy(c => c.Position)
             .ThenBy(c => c.CreatedAt)
-            .Select(c => new CardSummaryDto(c.Id, c.ColumnId, c.Title, c.Position, c.DueDate, c.CompletedAt != null))
+            .Select(c => new CardSummaryDto(
+                c.Id,
+                c.ColumnId,
+                c.Title,
+                c.Position,
+                c.DueDate,
+                c.CompletedAt != null,
+                c.Assignees.Select(a => a.UserId).ToList(),
+                c.Labels.Select(l => l.LabelId).ToList()))
             .ToListAsync(ct);
     }
 
@@ -170,6 +181,65 @@ public static class CardEndpoints
         return await LoadCardAsync(db, cardId, ct);
     }
 
+    private static async Task<CardDto> SetLabelsAsync(
+        Guid cardId,
+        SetCardLabelsRequest request,
+        ClaimsPrincipal principal,
+        WorkspaceAccess access,
+        TaskboardDbContext db,
+        TimeProvider clock,
+        CancellationToken ct)
+    {
+        var (card, _) = await access.RequireCardAsync(cardId, principal.GetUserId(), ct: ct);
+        var wanted = request.LabelIds.Distinct().ToList();
+        var valid = await db.Labels.Where(l => l.BoardId == card.BoardId && wanted.Contains(l.Id)).Select(l => l.Id).ToListAsync(ct);
+        if (valid.Count != wanted.Count)
+        {
+            throw new BadRequestException("Some of those labels don't belong to this board.");
+        }
+
+        var current = await db.CardLabels.Where(cl => cl.CardId == cardId).ToListAsync(ct);
+        db.CardLabels.RemoveRange(current.Where(cl => !wanted.Contains(cl.LabelId)));
+        db.CardLabels.AddRange(wanted
+            .Where(id => current.All(cl => cl.LabelId != id))
+            .Select(id => new CardLabel { CardId = cardId, LabelId = id }));
+        card.UpdatedAt = clock.GetUtcNow().UtcDateTime;
+        await db.SaveChangesAsync(ct);
+
+        return await LoadCardAsync(db, cardId, ct);
+    }
+
+    private static async Task<CardDto> SetAssigneesAsync(
+        Guid cardId,
+        SetCardAssigneesRequest request,
+        ClaimsPrincipal principal,
+        WorkspaceAccess access,
+        TaskboardDbContext db,
+        TimeProvider clock,
+        CancellationToken ct)
+    {
+        var (card, member) = await access.RequireCardAsync(cardId, principal.GetUserId(), ct: ct);
+        var wanted = request.UserIds.Distinct().ToList();
+        var valid = await db.WorkspaceMembers
+            .Where(m => m.WorkspaceId == member.WorkspaceId && wanted.Contains(m.UserId))
+            .Select(m => m.UserId)
+            .ToListAsync(ct);
+        if (valid.Count != wanted.Count)
+        {
+            throw new BadRequestException("Cards can only be assigned to members of this workspace.");
+        }
+
+        var current = await db.CardAssignees.Where(a => a.CardId == cardId).ToListAsync(ct);
+        db.CardAssignees.RemoveRange(current.Where(a => !wanted.Contains(a.UserId)));
+        db.CardAssignees.AddRange(wanted
+            .Where(id => current.All(a => a.UserId != id))
+            .Select(id => new CardAssignee { CardId = cardId, UserId = id }));
+        card.UpdatedAt = clock.GetUtcNow().UtcDateTime;
+        await db.SaveChangesAsync(ct);
+
+        return await LoadCardAsync(db, cardId, ct);
+    }
+
     internal static async Task<CardDto> LoadCardAsync(TaskboardDbContext db, Guid cardId, CancellationToken ct)
     {
         return await db.Cards
@@ -185,6 +255,14 @@ public static class CardEndpoints
                 c.DueDate,
                 c.CompletedAt,
                 new CardUserDto(c.CreatedById, c.CreatedBy.DisplayName),
+                c.Assignees
+                    .OrderBy(a => a.User.DisplayName)
+                    .Select(a => new CardUserDto(a.UserId, a.User.DisplayName))
+                    .ToList(),
+                c.Labels
+                    .OrderBy(l => l.Label.Name)
+                    .Select(l => new LabelDto(l.LabelId, l.Label.Name, l.Label.Color))
+                    .ToList(),
                 c.CreatedAt,
                 c.UpdatedAt))
             .SingleOrDefaultAsync(ct)

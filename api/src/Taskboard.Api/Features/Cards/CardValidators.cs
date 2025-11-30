@@ -26,3 +26,19 @@ public sealed class MoveCardRequestValidator : AbstractValidator<MoveCardRequest
         RuleFor(r => r.ColumnId).NotEmpty();
     }
 }
+
+public sealed class SetCardLabelsRequestValidator : AbstractValidator<SetCardLabelsRequest>
+{
+    public SetCardLabelsRequestValidator()
+    {
+        RuleFor(r => r.LabelIds).NotNull().Must(ids => ids.Count <= 20).WithMessage("A card can have at most 20 labels.");
+    }
+}
+
+public sealed class SetCardAssigneesRequestValidator : AbstractValidator<SetCardAssigneesRequest>
+{
+    public SetCardAssigneesRequestValidator()
+    {
+        RuleFor(r => r.UserIds).NotNull().Must(ids => ids.Count <= 20).WithMessage("A card can have at most 20 assignees.");
+    }
+}

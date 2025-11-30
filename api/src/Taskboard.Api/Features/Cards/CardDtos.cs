@@ -1,3 +1,5 @@
+using Taskboard.Api.Features.Labels;
+
 namespace Taskboard.Api.Features.Cards;
 
 public sealed record CreateCardRequest(string Title);
@@ -8,13 +10,19 @@ public sealed record UpdateCardRequest(string Title, string? Description, DateOn
 /// <summary>Move a card into <paramref name="ColumnId"/>, right after <paramref name="AfterCardId"/> (or to the top).</summary>
 public sealed record MoveCardRequest(Guid ColumnId, Guid? AfterCardId);
 
+public sealed record SetCardLabelsRequest(IReadOnlyList<Guid> LabelIds);
+
+public sealed record SetCardAssigneesRequest(IReadOnlyList<Guid> UserIds);
+
 public sealed record CardSummaryDto(
     Guid Id,
     Guid ColumnId,
     string Title,
     long Position,
     DateOnly? DueDate,
-    bool Completed);
+    bool Completed,
+    IReadOnlyList<Guid> AssigneeIds,
+    IReadOnlyList<Guid> LabelIds);
 
 public sealed record CardUserDto(Guid Id, string DisplayName);
 
@@ -29,5 +37,7 @@ public sealed record CardDto(
     DateOnly? DueDate,
     DateTime? CompletedAt,
     CardUserDto CreatedBy,
+    IReadOnlyList<CardUserDto> Assignees,
+    IReadOnlyList<LabelDto> Labels,
     DateTime CreatedAt,
     DateTime UpdatedAt);

@@ -32,4 +32,6 @@ public class Card
     public DateTime UpdatedAt { get; set; }
 
     public List<CardLabel> Labels { get; set; } = [];
+
+    public List<CardAssignee> Assignees { get; set; } = [];
 }

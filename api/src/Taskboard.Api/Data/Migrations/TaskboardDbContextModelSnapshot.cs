@@ -158,6 +158,25 @@ namespace Taskboard.Api.Data.Migrations
                     b.ToTable("cards", (string)null);
                 });
 
+            modelBuilder.Entity("Taskboard.Api.Domain.CardAssignee", b =>
+                {
+                    b.Property<Guid>("CardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("card_id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("CardId", "UserId")
+                        .HasName("pk_card_assignees");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_card_assignees_user_id");
+
+                    b.ToTable("card_assignees", (string)null);
+                });
+
             modelBuilder.Entity("Taskboard.Api.Domain.CardLabel", b =>
                 {
                     b.Property<Guid>("CardId")
@@ -419,6 +438,27 @@ namespace Taskboard.Api.Data.Migrations
                     b.Navigation("CreatedBy");
                 });
 
+            modelBuilder.Entity("Taskboard.Api.Domain.CardAssignee", b =>
+                {
+                    b.HasOne("Taskboard.Api.Domain.Card", "Card")
+                        .WithMany("Assignees")
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_card_assignees_cards_card_id");
+
+                    b.HasOne("Taskboard.Api.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_card_assignees_users_user_id");
+
+                    b.Navigation("Card");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Taskboard.Api.Domain.CardLabel", b =>
                 {
                     b.HasOne("Taskboard.Api.Domain.Card", "Card")
@@ -501,6 +541,8 @@ namespace Taskboard.Api.Data.Migrations
 
             modelBuilder.Entity("Taskboard.Api.Domain.Card", b =>
                 {
+                    b.Navigation("Assignees");
+
                     b.Navigation("Labels");
                 });
 

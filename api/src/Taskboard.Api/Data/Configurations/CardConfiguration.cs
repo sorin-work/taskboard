@@ -17,3 +17,14 @@ public class CardConfiguration : IEntityTypeConfiguration<Card>
         builder.HasIndex(c => new { c.ColumnId, c.Position });
     }
 }
+
+public class CardAssigneeConfiguration : IEntityTypeConfiguration<CardAssignee>
+{
+    public void Configure(EntityTypeBuilder<CardAssignee> builder)
+    {
+        builder.HasKey(a => new { a.CardId, a.UserId });
+        builder.HasOne(a => a.Card).WithMany(c => c.Assignees).HasForeignKey(a => a.CardId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(a => a.User).WithMany().HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(a => a.UserId);
+    }
+}

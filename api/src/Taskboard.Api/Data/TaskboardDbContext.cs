@@ -23,6 +23,8 @@ public class TaskboardDbContext(DbContextOptions<TaskboardDbContext> options) : 
 
     public DbSet<CardLabel> CardLabels => Set<CardLabel>();
 
+    public DbSet<CardAssignee> CardAssignees => Set<CardAssignee>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TaskboardDbContext).Assembly);
