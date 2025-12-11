@@ -260,6 +260,47 @@ namespace Taskboard.Api.Data.Migrations
                     b.ToTable("checklist_items", (string)null);
                 });
 
+            modelBuilder.Entity("Taskboard.Api.Domain.Comment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)")
+                        .HasColumnName("body");
+
+                    b.Property<Guid>("CardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("card_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("EditedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("edited_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_comments");
+
+                    b.HasIndex("AuthorId")
+                        .HasDatabaseName("ix_comments_author_id");
+
+                    b.HasIndex("CardId", "CreatedAt")
+                        .HasDatabaseName("ix_comments_card_id_created_at");
+
+                    b.ToTable("comments", (string)null);
+                });
+
             modelBuilder.Entity("Taskboard.Api.Domain.Invitation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -568,6 +609,27 @@ namespace Taskboard.Api.Data.Migrations
                     b.Navigation("Checklist");
                 });
 
+            modelBuilder.Entity("Taskboard.Api.Domain.Comment", b =>
+                {
+                    b.HasOne("Taskboard.Api.Domain.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comments_users_author_id");
+
+                    b.HasOne("Taskboard.Api.Domain.Card", "Card")
+                        .WithMany("Comments")
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comments_cards_card_id");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Card");
+                });
+
             modelBuilder.Entity("Taskboard.Api.Domain.Invitation", b =>
                 {
                     b.HasOne("Taskboard.Api.Domain.User", "InvitedBy")
@@ -632,6 +694,8 @@ namespace Taskboard.Api.Data.Migrations
                     b.Navigation("Assignees");
 
                     b.Navigation("Checklists");
+
+                    b.Navigation("Comments");
 
                     b.Navigation("Labels");
                 });

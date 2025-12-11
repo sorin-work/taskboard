@@ -25,7 +25,8 @@ public sealed record CardSummaryDto(
     IReadOnlyList<Guid> AssigneeIds,
     IReadOnlyList<Guid> LabelIds,
     int ChecklistDone,
-    int ChecklistTotal);
+    int ChecklistTotal,
+    int CommentCount);
 
 public sealed record CardUserDto(Guid Id, string DisplayName);
 

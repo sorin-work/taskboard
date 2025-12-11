@@ -54,7 +54,8 @@ public static class CardEndpoints
                 c.Assignees.Select(a => a.UserId).ToList(),
                 c.Labels.Select(l => l.LabelId).ToList(),
                 c.Checklists.SelectMany(l => l.Items).Count(i => i.IsDone),
-                c.Checklists.SelectMany(l => l.Items).Count()))
+                c.Checklists.SelectMany(l => l.Items).Count(),
+                c.Comments.Count))
             .ToListAsync(ct);
     }
 
