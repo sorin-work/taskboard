@@ -196,6 +196,70 @@ namespace Taskboard.Api.Data.Migrations
                     b.ToTable("card_labels", (string)null);
                 });
 
+            modelBuilder.Entity("Taskboard.Api.Domain.Checklist", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("card_id");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id")
+                        .HasName("pk_checklists");
+
+                    b.HasIndex("CardId")
+                        .HasDatabaseName("ix_checklists_card_id");
+
+                    b.ToTable("checklists", (string)null);
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.ChecklistItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ChecklistId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("checklist_id");
+
+                    b.Property<bool>("IsDone")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_done");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("text");
+
+                    b.HasKey("Id")
+                        .HasName("pk_checklist_items");
+
+                    b.HasIndex("ChecklistId")
+                        .HasDatabaseName("ix_checklist_items_checklist_id");
+
+                    b.ToTable("checklist_items", (string)null);
+                });
+
             modelBuilder.Entity("Taskboard.Api.Domain.Invitation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -480,6 +544,30 @@ namespace Taskboard.Api.Data.Migrations
                     b.Navigation("Label");
                 });
 
+            modelBuilder.Entity("Taskboard.Api.Domain.Checklist", b =>
+                {
+                    b.HasOne("Taskboard.Api.Domain.Card", "Card")
+                        .WithMany("Checklists")
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_checklists_cards_card_id");
+
+                    b.Navigation("Card");
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.ChecklistItem", b =>
+                {
+                    b.HasOne("Taskboard.Api.Domain.Checklist", "Checklist")
+                        .WithMany("Items")
+                        .HasForeignKey("ChecklistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_checklist_items_checklists_checklist_id");
+
+                    b.Navigation("Checklist");
+                });
+
             modelBuilder.Entity("Taskboard.Api.Domain.Invitation", b =>
                 {
                     b.HasOne("Taskboard.Api.Domain.User", "InvitedBy")
@@ -543,7 +631,14 @@ namespace Taskboard.Api.Data.Migrations
                 {
                     b.Navigation("Assignees");
 
+                    b.Navigation("Checklists");
+
                     b.Navigation("Labels");
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.Checklist", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Taskboard.Api.Domain.Workspace", b =>

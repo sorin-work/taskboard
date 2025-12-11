@@ -7,6 +7,7 @@ using Taskboard.Api.Data;
 using Taskboard.Api.Features.Auth;
 using Taskboard.Api.Features.Boards;
 using Taskboard.Api.Features.Cards;
+using Taskboard.Api.Features.Checklists;
 using Taskboard.Api.Features.Invitations;
 using Taskboard.Api.Features.Labels;
 using Taskboard.Api.Features.Workspaces;
@@ -43,6 +44,7 @@ app.MapBoardEndpoints();
 app.MapColumnEndpoints();
 app.MapCardEndpoints();
 app.MapLabelEndpoints();
+app.MapChecklistEndpoints();
 
 await app.RunAsync();
 

@@ -34,4 +34,6 @@ public class Card
     public List<CardLabel> Labels { get; set; } = [];
 
     public List<CardAssignee> Assignees { get; set; } = [];
+
+    public List<Checklist> Checklists { get; set; } = [];
 }

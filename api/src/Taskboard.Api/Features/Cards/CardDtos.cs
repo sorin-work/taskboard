@@ -1,3 +1,4 @@
+using Taskboard.Api.Features.Checklists;
 using Taskboard.Api.Features.Labels;
 
 namespace Taskboard.Api.Features.Cards;
@@ -22,7 +23,9 @@ public sealed record CardSummaryDto(
     DateOnly? DueDate,
     bool Completed,
     IReadOnlyList<Guid> AssigneeIds,
-    IReadOnlyList<Guid> LabelIds);
+    IReadOnlyList<Guid> LabelIds,
+    int ChecklistDone,
+    int ChecklistTotal);
 
 public sealed record CardUserDto(Guid Id, string DisplayName);
 
@@ -39,5 +42,6 @@ public sealed record CardDto(
     CardUserDto CreatedBy,
     IReadOnlyList<CardUserDto> Assignees,
     IReadOnlyList<LabelDto> Labels,
+    IReadOnlyList<ChecklistDto> Checklists,
     DateTime CreatedAt,
     DateTime UpdatedAt);

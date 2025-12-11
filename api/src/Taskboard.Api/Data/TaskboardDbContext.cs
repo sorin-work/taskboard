@@ -25,6 +25,10 @@ public class TaskboardDbContext(DbContextOptions<TaskboardDbContext> options) : 
 
     public DbSet<CardAssignee> CardAssignees => Set<CardAssignee>();
 
+    public DbSet<Checklist> Checklists => Set<Checklist>();
+
+    public DbSet<ChecklistItem> ChecklistItems => Set<ChecklistItem>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TaskboardDbContext).Assembly);

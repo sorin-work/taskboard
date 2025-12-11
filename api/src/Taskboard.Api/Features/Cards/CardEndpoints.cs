@@ -4,6 +4,7 @@ using Taskboard.Api.Auth;
 using Taskboard.Api.Common;
 using Taskboard.Api.Data;
 using Taskboard.Api.Domain;
+using Taskboard.Api.Features.Checklists;
 using Taskboard.Api.Features.Labels;
 using Taskboard.Api.Features.Workspaces;
 
@@ -51,7 +52,9 @@ public static class CardEndpoints
                 c.DueDate,
                 c.CompletedAt != null,
                 c.Assignees.Select(a => a.UserId).ToList(),
-                c.Labels.Select(l => l.LabelId).ToList()))
+                c.Labels.Select(l => l.LabelId).ToList(),
+                c.Checklists.SelectMany(l => l.Items).Count(i => i.IsDone),
+                c.Checklists.SelectMany(l => l.Items).Count()))
             .ToListAsync(ct);
     }
 
@@ -242,7 +245,14 @@ public static class CardEndpoints
 
     internal static async Task<CardDto> LoadCardAsync(TaskboardDbContext db, Guid cardId, CancellationToken ct)
     {
-        return await db.Cards
+        var checklists = await db.Checklists
+            .AsNoTracking()
+            .Include(c => c.Items)
+            .Where(c => c.CardId == cardId)
+            .OrderBy(c => c.Position)
+            .ToListAsync(ct);
+
+        var card = await db.Cards
             .Where(c => c.Id == cardId)
             .Select(c => new CardDto(
                 c.Id,
@@ -263,9 +273,12 @@ public static class CardEndpoints
                     .OrderBy(l => l.Label.Name)
                     .Select(l => new LabelDto(l.LabelId, l.Label.Name, l.Label.Color))
                     .ToList(),
+                new List<ChecklistDto>(),
                 c.CreatedAt,
                 c.UpdatedAt))
             .SingleOrDefaultAsync(ct)
             ?? throw new NotFoundException("Card not found.");
+
+        return card with { Checklists = [.. checklists.Select(ChecklistEndpoints.ToDto)] };
     }
 }
