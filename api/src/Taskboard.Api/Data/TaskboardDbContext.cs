@@ -31,6 +31,8 @@ public class TaskboardDbContext(DbContextOptions<TaskboardDbContext> options) : 
 
     public DbSet<Comment> Comments => Set<Comment>();
 
+    public DbSet<Activity> Activities => Set<Activity>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TaskboardDbContext).Assembly);

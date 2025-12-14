@@ -4,6 +4,7 @@ using FluentValidation;
 using Taskboard.Api.Auth;
 using Taskboard.Api.Common;
 using Taskboard.Api.Data;
+using Taskboard.Api.Features.Activity;
 using Taskboard.Api.Features.Auth;
 using Taskboard.Api.Features.Boards;
 using Taskboard.Api.Features.Cards;
@@ -23,6 +24,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddTaskboardAuth(builder.Configuration);
 builder.Services.AddScoped<WorkspaceAccess>();
+builder.Services.AddScoped<ActivityLog>();
 builder.Services.AddSingleton<IInvitationNotifier, LoggingInvitationNotifier>();
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));

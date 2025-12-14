@@ -22,6 +22,56 @@ namespace Taskboard.Api.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Taskboard.Api.Domain.Activity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ActorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_id");
+
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("board_id");
+
+                    b.Property<Guid?>("CardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("card_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("data");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_activities");
+
+                    b.HasIndex("ActorId")
+                        .HasDatabaseName("ix_activities_actor_id");
+
+                    b.HasIndex("BoardId", "CreatedAt")
+                        .HasDatabaseName("ix_activities_board_id_created_at");
+
+                    b.HasIndex("CardId", "CreatedAt")
+                        .HasDatabaseName("ix_activities_card_id_created_at");
+
+                    b.ToTable("activities", (string)null);
+                });
+
             modelBuilder.Entity("Taskboard.Api.Domain.Board", b =>
                 {
                     b.Property<Guid>("Id")
@@ -487,6 +537,35 @@ namespace Taskboard.Api.Data.Migrations
                         .HasDatabaseName("ix_workspace_members_user_id");
 
                     b.ToTable("workspace_members", (string)null);
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.Activity", b =>
+                {
+                    b.HasOne("Taskboard.Api.Domain.User", "Actor")
+                        .WithMany()
+                        .HasForeignKey("ActorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_activities_users_actor_id");
+
+                    b.HasOne("Taskboard.Api.Domain.Board", "Board")
+                        .WithMany()
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_activities_boards_board_id");
+
+                    b.HasOne("Taskboard.Api.Domain.Card", "Card")
+                        .WithMany()
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_activities_cards_card_id");
+
+                    b.Navigation("Actor");
+
+                    b.Navigation("Board");
+
+                    b.Navigation("Card");
                 });
 
             modelBuilder.Entity("Taskboard.Api.Domain.Board", b =>
