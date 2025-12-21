@@ -12,6 +12,7 @@ using Taskboard.Api.Features.Checklists;
 using Taskboard.Api.Features.Comments;
 using Taskboard.Api.Features.Invitations;
 using Taskboard.Api.Features.Labels;
+using Taskboard.Api.Features.MyTasks;
 using Taskboard.Api.Features.Workspaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,6 +51,7 @@ app.MapLabelEndpoints();
 app.MapChecklistEndpoints();
 app.MapCommentEndpoints();
 app.MapActivityEndpoints();
+app.MapMyTasksEndpoints();
 
 await app.RunAsync();
 
