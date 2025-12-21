@@ -35,14 +35,17 @@ public static class CardEndpoints
 
     private static async Task<List<CardSummaryDto>> ListAsync(
         Guid boardId,
+        [AsParameters] CardFilter filter,
         ClaimsPrincipal principal,
         WorkspaceAccess access,
         TaskboardDbContext db,
+        TimeProvider clock,
         CancellationToken ct)
     {
-        await access.RequireBoardAsync(boardId, principal.GetUserId(), ct: ct);
-        return await db.Cards
-            .Where(c => c.BoardId == boardId)
+        var userId = principal.GetUserId();
+        await access.RequireBoardAsync(boardId, userId, ct: ct);
+        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        return await filter.Apply(db.Cards.Where(c => c.BoardId == boardId), userId, today)
             .OrderBy(c => c.Column.Position)
             .ThenBy(c => c.Position)
             .ThenBy(c => c.CreatedAt)
