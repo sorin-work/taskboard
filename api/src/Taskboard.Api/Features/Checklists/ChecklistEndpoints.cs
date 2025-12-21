@@ -4,6 +4,7 @@ using Taskboard.Api.Auth;
 using Taskboard.Api.Common;
 using Taskboard.Api.Data;
 using Taskboard.Api.Domain;
+using Taskboard.Api.Features.Activity;
 using Taskboard.Api.Features.Workspaces;
 
 namespace Taskboard.Api.Features.Checklists;
@@ -108,9 +109,17 @@ public static class ChecklistEndpoints
         ClaimsPrincipal principal,
         WorkspaceAccess access,
         TaskboardDbContext db,
+        ActivityLog activity,
         CancellationToken ct)
     {
-        var item = await FindItemAsync(db, access, itemId, principal.GetUserId(), ct);
+        var userId = principal.GetUserId();
+        var item = await FindItemAsync(db, access, itemId, userId, ct);
+        if (request.Done && !item.IsDone)
+        {
+            var card = await db.Cards.SingleAsync(c => c.Id == item.Checklist.CardId, ct);
+            activity.Card(card, userId, ActivityTypes.ChecklistItemCompleted, new() { ["item"] = request.Text.Trim() });
+        }
+
         item.Text = request.Text.Trim();
         item.IsDone = request.Done;
         await db.SaveChangesAsync(ct);

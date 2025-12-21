@@ -4,6 +4,7 @@ using Taskboard.Api.Auth;
 using Taskboard.Api.Common;
 using Taskboard.Api.Data;
 using Taskboard.Api.Domain;
+using Taskboard.Api.Features.Activity;
 using Taskboard.Api.Features.Workspaces;
 
 namespace Taskboard.Api.Features.Boards;
@@ -33,9 +34,11 @@ public static class ColumnEndpoints
         ClaimsPrincipal principal,
         WorkspaceAccess access,
         TaskboardDbContext db,
+        ActivityLog activity,
         CancellationToken ct)
     {
-        var (board, _) = await access.RequireBoardAsync(boardId, principal.GetUserId(), ct: ct);
+        var userId = principal.GetUserId();
+        var (board, _) = await access.RequireBoardAsync(boardId, userId, ct: ct);
         var count = await db.Columns.CountAsync(c => c.BoardId == board.Id, ct);
         if (count >= MaxColumnsPerBoard)
         {
@@ -44,6 +47,7 @@ public static class ColumnEndpoints
 
         var column = new BoardColumn { Id = Guid.NewGuid(), BoardId = board.Id, Name = request.Name.Trim(), Position = count };
         db.Columns.Add(column);
+        activity.Board(board.Id, userId, ActivityTypes.ColumnCreated, new() { ["column"] = column.Name });
         await db.SaveChangesAsync(ct);
 
         return Results.Created($"/api/columns/{column.Id}", new ColumnDto(column.Id, column.Name, column.Position));
@@ -55,10 +59,18 @@ public static class ColumnEndpoints
         ClaimsPrincipal principal,
         WorkspaceAccess access,
         TaskboardDbContext db,
+        ActivityLog activity,
         CancellationToken ct)
     {
-        var column = await FindColumnAsync(db, access, columnId, principal.GetUserId(), ct);
-        column.Name = request.Name.Trim();
+        var userId = principal.GetUserId();
+        var column = await FindColumnAsync(db, access, columnId, userId, ct);
+        var name = request.Name.Trim();
+        if (name != column.Name)
+        {
+            activity.Board(column.BoardId, userId, ActivityTypes.ColumnRenamed, new() { ["from"] = column.Name, ["column"] = name });
+        }
+
+        column.Name = name;
         await db.SaveChangesAsync(ct);
         return new ColumnDto(column.Id, column.Name, column.Position);
     }
@@ -90,9 +102,12 @@ public static class ColumnEndpoints
         ClaimsPrincipal principal,
         WorkspaceAccess access,
         TaskboardDbContext db,
+        ActivityLog activity,
         CancellationToken ct)
     {
-        var column = await FindColumnAsync(db, access, columnId, principal.GetUserId(), ct);
+        var userId = principal.GetUserId();
+        var column = await FindColumnAsync(db, access, columnId, userId, ct);
+        activity.Board(column.BoardId, userId, ActivityTypes.ColumnDeleted, new() { ["column"] = column.Name });
 
         db.Columns.Remove(column);
         var rest = await db.Columns

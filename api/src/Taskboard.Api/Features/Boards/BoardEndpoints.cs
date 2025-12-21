@@ -4,6 +4,7 @@ using Taskboard.Api.Auth;
 using Taskboard.Api.Common;
 using Taskboard.Api.Data;
 using Taskboard.Api.Domain;
+using Taskboard.Api.Features.Activity;
 using Taskboard.Api.Features.Labels;
 using Taskboard.Api.Features.Workspaces;
 
@@ -54,10 +55,12 @@ public static class BoardEndpoints
         ClaimsPrincipal principal,
         WorkspaceAccess access,
         TaskboardDbContext db,
+        ActivityLog activity,
         TimeProvider clock,
         CancellationToken ct)
     {
-        var member = await access.RequireMemberAsync(workspaceId, principal.GetUserId(), ct: ct);
+        var userId = principal.GetUserId();
+        var member = await access.RequireMemberAsync(workspaceId, userId, ct: ct);
         var columns = request.Columns is { Count: > 0 } ? request.Columns : DefaultColumns;
 
         var board = new Board
@@ -70,6 +73,7 @@ public static class BoardEndpoints
             Columns = [.. columns.Select((name, i) => new BoardColumn { Id = Guid.NewGuid(), Name = name.Trim(), Position = i })],
         };
         db.Boards.Add(board);
+        activity.Board(board.Id, userId, ActivityTypes.BoardCreated, new() { ["board"] = board.Name });
         await db.SaveChangesAsync(ct);
 
         return Results.Created($"/api/boards/{board.Id}", await LoadBoardAsync(db, board.Id, member.Role, ct));

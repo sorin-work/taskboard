@@ -4,6 +4,7 @@ using Taskboard.Api.Auth;
 using Taskboard.Api.Common;
 using Taskboard.Api.Data;
 using Taskboard.Api.Domain;
+using Taskboard.Api.Features.Activity;
 using Taskboard.Api.Features.Cards;
 using Taskboard.Api.Features.Workspaces;
 
@@ -45,6 +46,7 @@ public static class CommentEndpoints
         ClaimsPrincipal principal,
         WorkspaceAccess access,
         TaskboardDbContext db,
+        ActivityLog activity,
         TimeProvider clock,
         CancellationToken ct)
     {
@@ -59,6 +61,7 @@ public static class CommentEndpoints
             CreatedAt = clock.GetUtcNow().UtcDateTime,
         };
         db.Comments.Add(comment);
+        activity.Card(card, userId, ActivityTypes.CommentAdded, new() { ["excerpt"] = Excerpt(comment.Body) });
         await db.SaveChangesAsync(ct);
 
         return Results.Created($"/api/comments/{comment.Id}", await LoadAsync(db, comment.Id, ct));
@@ -103,6 +106,12 @@ public static class CommentEndpoints
         db.Comments.Remove(comment);
         await db.SaveChangesAsync(ct);
         return Results.NoContent();
+    }
+
+    internal static string Excerpt(string body)
+    {
+        var flat = string.Join(' ', body.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        return flat.Length <= 120 ? flat : string.Concat(flat.AsSpan(0, 117), "...");
     }
 
     private static async Task<CommentDto> LoadAsync(TaskboardDbContext db, Guid commentId, CancellationToken ct) =>
