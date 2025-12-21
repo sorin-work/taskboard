@@ -49,6 +49,7 @@ app.MapCardEndpoints();
 app.MapLabelEndpoints();
 app.MapChecklistEndpoints();
 app.MapCommentEndpoints();
+app.MapActivityEndpoints();
 
 await app.RunAsync();
 
