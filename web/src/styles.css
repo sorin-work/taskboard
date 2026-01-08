@@ -18,3 +18,102 @@ body {
   margin: 4rem auto;
   padding: 0 1rem;
 }
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: #2f5bd3;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 1px solid #c9cfdb;
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+}
+
+button.primary {
+  background: #2f5bd3;
+  border-color: #2f5bd3;
+  color: #fff;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.muted {
+  color: #667085;
+}
+
+.error {
+  color: #b42318;
+  margin: 0;
+}
+
+.page-loading {
+  padding: 3rem;
+  text-align: center;
+  color: #667085;
+}
+
+/* Auth pages */
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 24rem;
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgb(16 24 40 / 10%);
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-card h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.field label {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.field input {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #c9cfdb;
+  border-radius: 6px;
+}
+
+.field input[aria-invalid='true'] {
+  border-color: #b42318;
+}
+
+.field-error {
+  color: #b42318;
+  font-size: 0.85rem;
+  margin: 0;
+}
