@@ -424,3 +424,19 @@ button:disabled {
   background: #fff;
   border-color: #c9cfdb;
 }
+
+.card-tile.dragging {
+  opacity: 0.45;
+}
+
+.board-column.drop-target {
+  background: #dde3f0;
+}
+
+.drop-indicator {
+  height: 3px;
+  border-radius: 2px;
+  background: #2f5bd3;
+  margin: 0 0 0.3rem;
+  list-style: none;
+}

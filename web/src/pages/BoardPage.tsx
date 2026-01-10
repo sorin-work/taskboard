@@ -1,22 +1,53 @@
+import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { boardsApi } from '../api/boards';
+import { cardsApi } from '../api/cards';
 import type { CardSummary } from '../api/types';
 import { AddColumnForm } from '../board/AddColumnForm';
 import { BoardColumn } from '../board/BoardColumn';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { groupByColumn, isNoopMove, moveCard } from '../lib/ordering';
 import { queryKeys } from '../lib/queryKeys';
+
+interface MoveArgs {
+  cardId: string;
+  columnId: string;
+  afterCardId: string | null;
+}
 
 export function BoardPage() {
   const { boardId = '' } = useParams();
   const [, setParams] = useSearchParams();
+  const queryClient = useQueryClient();
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
   const board = useQuery({
     queryKey: queryKeys.board(boardId),
     queryFn: () => boardsApi.get(boardId),
   });
-  const cards = useQuery({
-    queryKey: queryKeys.cards(boardId),
-    queryFn: () => boardsApi.cards(boardId),
+  const cardsKey = queryKeys.cards(boardId);
+  const cards = useQuery({ queryKey: cardsKey, queryFn: () => boardsApi.cards(boardId) });
+
+  const move = useMutation({
+    mutationFn: ({ cardId, columnId, afterCardId }: MoveArgs) =>
+      cardsApi.move(cardId, columnId, afterCardId),
+    onMutate: async ({ cardId, columnId, afterCardId }) => {
+      await queryClient.cancelQueries({ queryKey: cardsKey });
+      const previous = queryClient.getQueryData<CardSummary[]>(cardsKey);
+      if (previous) {
+        queryClient.setQueryData(cardsKey, moveCard(previous, cardId, columnId, afterCardId));
+      }
+      return { previous };
+    },
+    onError: (_error, _args, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(cardsKey, context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'cards'] });
+    },
   });
 
   if (board.isPending) {
@@ -26,9 +57,15 @@ export function BoardPage() {
     return <ErrorMessage error={board.error} />;
   }
 
-  const byColumn = new Map<string, CardSummary[]>();
-  for (const card of cards.data ?? []) {
-    byColumn.set(card.columnId, [...(byColumn.get(card.columnId) ?? []), card]);
+  const byColumn = groupByColumn(cards.data ?? []);
+
+  function dropCard(cardId: string, columnId: string, afterCardId: string | null) {
+    setDraggingId(null);
+    const card = cards.data?.find((c) => c.id === cardId);
+    if (!card || isNoopMove(byColumn.get(columnId) ?? [], card, columnId, afterCardId)) {
+      return;
+    }
+    move.mutate({ cardId, columnId, afterCardId });
   }
 
   return (
@@ -42,7 +79,7 @@ export function BoardPage() {
           {board.data.description && <p className="muted">{board.data.description}</p>}
         </div>
       </header>
-      <ErrorMessage error={cards.error} />
+      <ErrorMessage error={cards.error ?? move.error} />
       <div className="columns">
         {board.data.columns.map((column) => (
           <BoardColumn
@@ -50,7 +87,11 @@ export function BoardPage() {
             boardId={boardId}
             column={column}
             cards={byColumn.get(column.id) ?? []}
+            draggingId={draggingId}
             onOpenCard={(cardId) => setParams({ card: cardId })}
+            onDragStart={setDraggingId}
+            onDragEnd={() => setDraggingId(null)}
+            onDropCard={dropCard}
           />
         ))}
         <AddColumnForm boardId={boardId} />
