@@ -117,3 +117,86 @@ button:disabled {
   font-size: 0.85rem;
   margin: 0;
 }
+
+/* App shell */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1.25rem;
+  background: #1d2433;
+  color: #fff;
+}
+
+.topbar a {
+  color: #dfe5f2;
+  text-decoration: none;
+}
+
+.topbar a.active {
+  color: #fff;
+  font-weight: 600;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #fff !important;
+}
+
+.workspace-switcher {
+  background: #2c3548;
+  color: #fff;
+  border: 1px solid #3d4760;
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+}
+
+.topbar-nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.topbar-user {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.content {
+  flex: 1;
+  padding: 1.5rem;
+  min-width: 0;
+}
+
+.empty-state {
+  max-width: 32rem;
+  margin: 3rem auto;
+  text-align: center;
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.inline-form input {
+  flex: 1;
+  min-width: 12rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #c9cfdb;
+  border-radius: 6px;
+}
+
+.inline-form .error {
+  flex-basis: 100%;
+}

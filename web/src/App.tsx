@@ -7,6 +7,7 @@ import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { createQueryClient } from './queryClient';
+import { Layout } from './components/Layout';
 
 export function App() {
   const [queryClient] = useState(createQueryClient);
@@ -20,7 +21,9 @@ export function App() {
               <Route path="/signup" element={<SignupPage />} />
             </Route>
             <Route element={<RequireAuth />}>
-              <Route path="/" element={<HomePage />} />
+              <Route element={<Layout />}>
+                <Route path="/" element={<HomePage />} />
+              </Route>
             </Route>
           </Routes>
         </AuthProvider>
