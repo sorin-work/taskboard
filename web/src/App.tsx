@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Route, Routes } from 'react-router';
 import { AuthProvider } from './auth/AuthContext';
 import { RedirectIfSignedIn, RequireAuth } from './auth/guards';
+import { BoardPage } from './pages/BoardPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
@@ -25,6 +26,7 @@ export function App() {
               <Route element={<Layout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/w/:workspaceId" element={<WorkspacePage />} />
+                <Route path="/b/:boardId" element={<BoardPage />} />
               </Route>
             </Route>
           </Routes>
