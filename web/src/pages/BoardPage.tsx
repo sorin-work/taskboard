@@ -7,6 +7,7 @@ import type { CardSummary } from '../api/types';
 import { AddColumnForm } from '../board/AddColumnForm';
 import { BoardColumn } from '../board/BoardColumn';
 import { CardModal } from '../board/CardModal';
+import { LabelManager } from '../board/LabelManager';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { groupByColumn, isNoopMove, moveCard } from '../lib/ordering';
 import { queryKeys } from '../lib/queryKeys';
@@ -23,6 +24,7 @@ export function BoardPage() {
   const openCardId = params.get('card');
   const queryClient = useQueryClient();
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [showLabels, setShowLabels] = useState(false);
 
   const board = useQuery({
     queryKey: queryKeys.board(boardId),
@@ -80,6 +82,11 @@ export function BoardPage() {
           <h1>{board.data.name}</h1>
           {board.data.description && <p className="muted">{board.data.description}</p>}
         </div>
+        <div className="row">
+          <button type="button" onClick={() => setShowLabels(true)}>
+            Labels
+          </button>
+        </div>
       </header>
       <ErrorMessage error={cards.error ?? move.error} />
       <div className="columns">
@@ -99,6 +106,7 @@ export function BoardPage() {
         ))}
         <AddColumnForm boardId={boardId} />
       </div>
+      {showLabels && <LabelManager board={board.data} onClose={() => setShowLabels(false)} />}
       {openCardId && (
         <CardModal
           key={openCardId}
