@@ -4,10 +4,12 @@ import type { CardSummary, Column } from '../api/types';
 import { afterCardFor, dropIndex } from '../lib/ordering';
 import { AddCardForm } from './AddCardForm';
 import { CardTile } from './CardTile';
+import { ColumnHeader } from './ColumnHeader';
 
 interface BoardColumnProps {
   boardId: string;
   column: Column;
+  columnCount: number;
   cards: CardSummary[];
   draggingId: string | null;
   onOpenCard: (cardId: string) => void;
@@ -19,6 +21,7 @@ interface BoardColumnProps {
 export function BoardColumn({
   boardId,
   column,
+  columnCount,
   cards,
   draggingId,
   onOpenCard,
@@ -69,10 +72,12 @@ export function BoardColumn({
       }}
       onDrop={handleDrop}
     >
-      <header className="column-header">
-        <h2>{column.name}</h2>
-        <span className="count">{cards.length}</span>
-      </header>
+      <ColumnHeader
+        boardId={boardId}
+        column={column}
+        columnCount={columnCount}
+        cardCount={cards.length}
+      />
       <ol className="card-list" ref={listRef}>
         {cards.map((card, i) => (
           <li key={card.id} data-card-id={card.id}>

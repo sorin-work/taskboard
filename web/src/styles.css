@@ -440,3 +440,54 @@ button:disabled {
   margin: 0 0 0.3rem;
   list-style: none;
 }
+
+.icon-button {
+  border: none;
+  background: transparent;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.icon-button:hover {
+  background: rgb(0 0 0 / 7%);
+}
+
+.menu {
+  position: relative;
+}
+
+.menu-popover {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 10;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgb(16 24 40 / 18%);
+  display: grid;
+  min-width: 10rem;
+  padding: 0.3rem;
+}
+
+.menu-popover button {
+  border: none;
+  background: none;
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+}
+
+.menu-popover button:hover:not(:disabled) {
+  background: #f2f4f7;
+}
+
+.danger {
+  color: #b42318;
+}
+
+.column-rename input {
+  width: 100%;
+  padding: 0.2rem 0.35rem;
+  border: 1px solid #c9cfdb;
+  border-radius: 4px;
+}
