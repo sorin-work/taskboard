@@ -6,6 +6,7 @@ import { cardsApi } from '../api/cards';
 import type { CardSummary } from '../api/types';
 import { AddColumnForm } from '../board/AddColumnForm';
 import { BoardColumn } from '../board/BoardColumn';
+import { CardModal } from '../board/CardModal';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { groupByColumn, isNoopMove, moveCard } from '../lib/ordering';
 import { queryKeys } from '../lib/queryKeys';
@@ -18,7 +19,8 @@ interface MoveArgs {
 
 export function BoardPage() {
   const { boardId = '' } = useParams();
-  const [, setParams] = useSearchParams();
+  const [params, setParams] = useSearchParams();
+  const openCardId = params.get('card');
   const queryClient = useQueryClient();
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
@@ -97,6 +99,14 @@ export function BoardPage() {
         ))}
         <AddColumnForm boardId={boardId} />
       </div>
+      {openCardId && (
+        <CardModal
+          key={openCardId}
+          board={board.data}
+          cardId={openCardId}
+          onClose={() => setParams({})}
+        />
+      )}
     </section>
   );
 }
