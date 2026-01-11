@@ -593,3 +593,86 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+.small {
+  font-size: 0.85rem;
+}
+
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 600;
+  flex: none;
+}
+
+.label-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.label-chip {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.label-chip.compact {
+  width: 2.2rem;
+  height: 0.45rem;
+  padding: 0;
+}
+
+.label-gray {
+  background: #667085;
+}
+.label-red {
+  background: #d92d20;
+}
+.label-orange {
+  background: #e04f16;
+}
+.label-yellow {
+  background: #ca8504;
+}
+.label-green {
+  background: #079455;
+}
+.label-teal {
+  background: #0e9384;
+}
+.label-blue {
+  background: #1570ef;
+}
+.label-purple {
+  background: #7a5af8;
+}
+.label-pink {
+  background: #dd2590;
+}
+
+.picker {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.picker legend {
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+}
+
+.picker-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+}

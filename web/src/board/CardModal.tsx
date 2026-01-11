@@ -4,8 +4,10 @@ import { cardsApi } from '../api/cards';
 import type { CardUpdate } from '../api/cards';
 import type { Board, Card } from '../api/types';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { LabelChip } from '../components/LabelChip';
 import { Modal } from '../components/Modal';
 import { queryKeys } from '../lib/queryKeys';
+import { AssigneePicker, LabelPicker } from './CardPeople';
 
 interface CardModalProps {
   board: Board;
@@ -97,6 +99,13 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
         <p className="muted">
           in <strong>{card.columnName}</strong> · added by {card.createdBy.displayName}
         </p>
+        {card.labels.length > 0 && (
+          <div className="label-row">
+            {card.labels.map((label) => (
+              <LabelChip key={label.id} label={label} />
+            ))}
+          </div>
+        )}
 
         <section>
           <h3>Description</h3>
@@ -169,6 +178,9 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
             )}
           </div>
         </div>
+
+        <AssigneePicker board={board} card={card} />
+        <LabelPicker board={board} card={card} />
 
         <div className="field">
           <label htmlFor="card-column">Column</label>
