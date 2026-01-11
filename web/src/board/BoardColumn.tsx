@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { DragEvent } from 'react';
-import type { CardSummary, Column } from '../api/types';
+import type { BoardMember, CardSummary, Column, Label } from '../api/types';
 import { afterCardFor, dropIndex } from '../lib/ordering';
 import { AddCardForm } from './AddCardForm';
 import { CardTile } from './CardTile';
@@ -11,6 +11,8 @@ interface BoardColumnProps {
   column: Column;
   columnCount: number;
   cards: CardSummary[];
+  labels: Label[];
+  members: BoardMember[];
   draggingId: string | null;
   onOpenCard: (cardId: string) => void;
   onDragStart: (cardId: string) => void;
@@ -23,6 +25,8 @@ export function BoardColumn({
   column,
   columnCount,
   cards,
+  labels,
+  members,
   draggingId,
   onOpenCard,
   onDragStart,
@@ -84,6 +88,8 @@ export function BoardColumn({
             {dropAt === i && <div className="drop-indicator" />}
             <CardTile
               card={card}
+              labels={labels}
+              members={members}
               dragging={draggingId === card.id}
               onOpen={onOpenCard}
               onDragStart={onDragStart}

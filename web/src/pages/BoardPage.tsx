@@ -97,6 +97,8 @@ export function BoardPage() {
             column={column}
             columnCount={board.data.columns.length}
             cards={byColumn.get(column.id) ?? []}
+            labels={board.data.labels}
+            members={board.data.members}
             draggingId={draggingId}
             onOpenCard={(cardId) => setParams({ card: cardId })}
             onDragStart={setDraggingId}

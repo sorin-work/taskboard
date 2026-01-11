@@ -712,3 +712,53 @@ button:disabled {
 .label-editor .error {
   flex-basis: 100%;
 }
+
+.card-tile.completed .card-title {
+  color: #667085;
+  text-decoration: line-through;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: #475467;
+}
+
+.card-meta:empty {
+  display: none;
+}
+
+.meta.done {
+  color: #067647;
+}
+
+.assignees {
+  margin-left: auto;
+  display: flex;
+  gap: 0.15rem;
+}
+
+.due-badge {
+  border-radius: 4px;
+  padding: 0.05rem 0.35rem;
+  background: #f2f4f7;
+}
+
+.due-overdue {
+  background: #fee4e2;
+  color: #b42318;
+}
+
+.due-today,
+.due-soon {
+  background: #fef0c7;
+  color: #93370d;
+}
+
+.due-done {
+  background: #dcfae6;
+  color: #067647;
+}
