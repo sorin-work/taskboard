@@ -9,6 +9,7 @@ import { Modal } from '../components/Modal';
 import { queryKeys } from '../lib/queryKeys';
 import { AssigneePicker, LabelPicker } from './CardPeople';
 import { ChecklistSection } from './ChecklistSection';
+import { CommentsSection } from './CommentsSection';
 
 interface CardModalProps {
   board: Board;
@@ -153,6 +154,7 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
 
         <ChecklistSection card={card} />
         <ErrorMessage error={update.error ?? move.error ?? remove.error} />
+        <CommentsSection card={card} role={board.role} />
       </div>
 
       <aside className="card-side">
