@@ -5,6 +5,7 @@ import { boardsApi } from '../api/boards';
 import { cardsApi } from '../api/cards';
 import type { CardSummary } from '../api/types';
 import { AddColumnForm } from '../board/AddColumnForm';
+import { BoardActivityPanel } from '../board/BoardActivityPanel';
 import { BoardColumn } from '../board/BoardColumn';
 import { CardModal } from '../board/CardModal';
 import { LabelManager } from '../board/LabelManager';
@@ -25,6 +26,7 @@ export function BoardPage() {
   const queryClient = useQueryClient();
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [showLabels, setShowLabels] = useState(false);
+  const [showActivity, setShowActivity] = useState(false);
 
   const board = useQuery({
     queryKey: queryKeys.board(boardId),
@@ -51,6 +53,7 @@ export function BoardPage() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'cards'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.boardActivity(boardId) });
     },
   });
 
@@ -86,27 +89,43 @@ export function BoardPage() {
           <button type="button" onClick={() => setShowLabels(true)}>
             Labels
           </button>
+          <button
+            type="button"
+            aria-pressed={showActivity}
+            onClick={() => setShowActivity((open) => !open)}
+          >
+            Activity
+          </button>
         </div>
       </header>
       <ErrorMessage error={cards.error ?? move.error} />
-      <div className="columns">
-        {board.data.columns.map((column) => (
-          <BoardColumn
-            key={column.id}
+      <div className="board-body">
+        <div className="columns">
+          {board.data.columns.map((column) => (
+            <BoardColumn
+              key={column.id}
+              boardId={boardId}
+              column={column}
+              columnCount={board.data.columns.length}
+              cards={byColumn.get(column.id) ?? []}
+              labels={board.data.labels}
+              members={board.data.members}
+              draggingId={draggingId}
+              onOpenCard={(cardId) => setParams({ card: cardId })}
+              onDragStart={setDraggingId}
+              onDragEnd={() => setDraggingId(null)}
+              onDropCard={dropCard}
+            />
+          ))}
+          <AddColumnForm boardId={boardId} />
+        </div>
+        {showActivity && (
+          <BoardActivityPanel
             boardId={boardId}
-            column={column}
-            columnCount={board.data.columns.length}
-            cards={byColumn.get(column.id) ?? []}
-            labels={board.data.labels}
-            members={board.data.members}
-            draggingId={draggingId}
+            onClose={() => setShowActivity(false)}
             onOpenCard={(cardId) => setParams({ card: cardId })}
-            onDragStart={setDraggingId}
-            onDragEnd={() => setDraggingId(null)}
-            onDropCard={dropCard}
           />
-        ))}
-        <AddColumnForm boardId={boardId} />
+        )}
       </div>
       {showLabels && <LabelManager board={board.data} onClose={() => setShowLabels(false)} />}
       {openCardId && (
