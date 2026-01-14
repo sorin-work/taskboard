@@ -7,6 +7,7 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { LabelChip } from '../components/LabelChip';
 import { Modal } from '../components/Modal';
 import { queryKeys } from '../lib/queryKeys';
+import { ActivityList } from './ActivityList';
 import { AssigneePicker, LabelPicker } from './CardPeople';
 import { ChecklistSection } from './ChecklistSection';
 import { CommentsSection } from './CommentsSection';
@@ -155,6 +156,7 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
         <ChecklistSection card={card} />
         <ErrorMessage error={update.error ?? move.error ?? remove.error} />
         <CommentsSection card={card} role={board.role} />
+        <CardActivity cardId={card.id} />
       </div>
 
       <aside className="card-side">
@@ -211,5 +213,19 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
         </button>
       </aside>
     </div>
+  );
+}
+
+function CardActivity({ cardId }: { cardId: string }) {
+  const activity = useQuery({
+    queryKey: queryKeys.cardActivity(cardId),
+    queryFn: () => cardsApi.activity(cardId),
+  });
+  return (
+    <section>
+      <h3>Activity</h3>
+      <ErrorMessage error={activity.error} />
+      {activity.data && <ActivityList items={activity.data} onCard />}
+    </section>
   );
 }
