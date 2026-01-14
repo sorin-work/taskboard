@@ -8,6 +8,7 @@ import { LabelChip } from '../components/LabelChip';
 import { Modal } from '../components/Modal';
 import { queryKeys } from '../lib/queryKeys';
 import { AssigneePicker, LabelPicker } from './CardPeople';
+import { ChecklistSection } from './ChecklistSection';
 
 interface CardModalProps {
   board: Board;
@@ -149,6 +150,8 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
             </button>
           )}
         </section>
+
+        <ChecklistSection card={card} />
         <ErrorMessage error={update.error ?? move.error ?? remove.error} />
       </div>
 
