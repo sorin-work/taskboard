@@ -1,14 +1,6 @@
-const palette = ['#2f5bd3', '#0e9384', '#c4320a', '#7a5af8', '#dd2590', '#4e5ba6', '#b54708'];
+import { initials } from '../lib/initials';
 
-export function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) {
-    return '?';
-  }
-  const first = parts[0]![0]!;
-  const last = parts.length > 1 ? parts.at(-1)![0]! : '';
-  return (first + last).toUpperCase();
-}
+const palette = ['#2f5bd3', '#0e9384', '#c4320a', '#7a5af8', '#dd2590', '#4e5ba6', '#b54708'];
 
 function colorFor(id: string): string {
   let hash = 0;

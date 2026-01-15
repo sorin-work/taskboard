@@ -6,19 +6,8 @@ import type { Board, Label, LabelColor } from '../api/types';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { LabelChip } from '../components/LabelChip';
 import { Modal } from '../components/Modal';
+import { LABEL_COLORS } from '../lib/labels';
 import { queryKeys } from '../lib/queryKeys';
-
-export const LABEL_COLORS: LabelColor[] = [
-  'gray',
-  'red',
-  'orange',
-  'yellow',
-  'green',
-  'teal',
-  'blue',
-  'purple',
-  'pink',
-];
 
 export function LabelManager({ board, onClose }: { board: Board; onClose: () => void }) {
   return (
