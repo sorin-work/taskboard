@@ -948,3 +948,26 @@ button[aria-pressed='true'] {
   background: #e8edfb;
   border-color: #2f5bd3;
 }
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.filter-bar input,
+.filter-bar select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c9cfdb;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.filter-bar input {
+  min-width: 14rem;
+}
+
+.filter-summary {
+  margin: -0.25rem 0 0.75rem;
+}

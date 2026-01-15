@@ -1,15 +1,18 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { boardsApi } from '../api/boards';
+import type { CardFilters } from '../api/boards';
 import { cardsApi } from '../api/cards';
 import type { CardSummary } from '../api/types';
 import { AddColumnForm } from '../board/AddColumnForm';
 import { BoardActivityPanel } from '../board/BoardActivityPanel';
 import { BoardColumn } from '../board/BoardColumn';
 import { CardModal } from '../board/CardModal';
+import { FilterBar } from '../board/FilterBar';
 import { LabelManager } from '../board/LabelManager';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { activeFilterCount, readFilters, writeFilters } from '../lib/filters';
 import { groupByColumn, isNoopMove, moveCard } from '../lib/ordering';
 import { queryKeys } from '../lib/queryKeys';
 
@@ -32,8 +35,30 @@ export function BoardPage() {
     queryKey: queryKeys.board(boardId),
     queryFn: () => boardsApi.get(boardId),
   });
-  const cardsKey = queryKeys.cards(boardId);
-  const cards = useQuery({ queryKey: cardsKey, queryFn: () => boardsApi.cards(boardId) });
+  // Only the filter params matter here; opening a card shouldn't refetch.
+  const filterKey = writeFilters(new URLSearchParams(), readFilters(params)).toString();
+  const filters = useMemo(() => readFilters(new URLSearchParams(filterKey)), [filterKey]);
+  const cardsKey = queryKeys.cards(boardId, { ...filters });
+  const cards = useQuery({
+    queryKey: cardsKey,
+    queryFn: () => boardsApi.cards(boardId, filters),
+    placeholderData: (previous) => previous,
+  });
+
+  const setFilters = useCallback(
+    (next: CardFilters) => setParams((current) => writeFilters(current, next), { replace: true }),
+    [setParams],
+  );
+  const openCard = (cardId: string | null) =>
+    setParams((current) => {
+      const next = new URLSearchParams(current);
+      if (cardId) {
+        next.set('card', cardId);
+      } else {
+        next.delete('card');
+      }
+      return next;
+    });
 
   const move = useMutation({
     mutationFn: ({ cardId, columnId, afterCardId }: MoveArgs) =>
@@ -98,6 +123,12 @@ export function BoardPage() {
           </button>
         </div>
       </header>
+      <FilterBar board={board.data} filters={filters} onChange={setFilters} />
+      {activeFilterCount(filters) > 0 && cards.data && (
+        <p className="muted small filter-summary">
+          Showing {cards.data.length} matching {cards.data.length === 1 ? 'card' : 'cards'}
+        </p>
+      )}
       <ErrorMessage error={cards.error ?? move.error} />
       <div className="board-body">
         <div className="columns">
@@ -111,7 +142,7 @@ export function BoardPage() {
               labels={board.data.labels}
               members={board.data.members}
               draggingId={draggingId}
-              onOpenCard={(cardId) => setParams({ card: cardId })}
+              onOpenCard={openCard}
               onDragStart={setDraggingId}
               onDragEnd={() => setDraggingId(null)}
               onDropCard={dropCard}
@@ -123,7 +154,7 @@ export function BoardPage() {
           <BoardActivityPanel
             boardId={boardId}
             onClose={() => setShowActivity(false)}
-            onOpenCard={(cardId) => setParams({ card: cardId })}
+            onOpenCard={openCard}
           />
         )}
       </div>
@@ -133,7 +164,7 @@ export function BoardPage() {
           key={openCardId}
           board={board.data}
           cardId={openCardId}
-          onClose={() => setParams({})}
+          onClose={() => openCard(null)}
         />
       )}
     </section>
