@@ -6,6 +6,7 @@ import { RedirectIfSignedIn, RequireAuth } from './auth/guards';
 import { BoardPage } from './pages/BoardPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
+import { MyTasksPage } from './pages/MyTasksPage';
 import { SignupPage } from './pages/SignupPage';
 import { WorkspacePage } from './pages/WorkspacePage';
 import { createQueryClient } from './queryClient';
@@ -27,6 +28,7 @@ export function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/w/:workspaceId" element={<WorkspacePage />} />
                 <Route path="/b/:boardId" element={<BoardPage />} />
+                <Route path="/my-tasks" element={<MyTasksPage />} />
               </Route>
             </Route>
           </Routes>

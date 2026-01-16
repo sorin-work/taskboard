@@ -971,3 +971,55 @@ button[aria-pressed='true'] {
 .filter-summary {
   margin: -0.25rem 0 0.75rem;
 }
+
+/* My tasks */
+.my-tasks {
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.task-group h2 {
+  font-size: 1rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 8%);
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.task:last-child {
+  border-bottom: none;
+}
+
+.task-title {
+  font-weight: 500;
+  color: inherit;
+  text-decoration: none;
+}
+
+.task-title:hover {
+  text-decoration: underline;
+}
+
+.task.completed .task-title {
+  color: #667085;
+  text-decoration: line-through;
+}
+
+.task-where {
+  margin-left: auto;
+}
