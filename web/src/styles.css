@@ -1023,3 +1023,96 @@ button[aria-pressed='true'] {
 .task-where {
   margin-left: auto;
 }
+
+/* Members */
+.members-page {
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+.member-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 8%);
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.member:last-child {
+  border-bottom: none;
+}
+
+.member-info {
+  display: grid;
+  flex: 1;
+  min-width: 10rem;
+}
+
+.member select {
+  padding: 0.3rem;
+  border: 1px solid #c9cfdb;
+  border-radius: 6px;
+}
+
+.role-badge {
+  font-size: 0.85rem;
+  color: #475467;
+}
+
+.member .error {
+  flex-basis: 100%;
+}
+
+.invitations {
+  margin-top: 2rem;
+}
+
+.invite-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.invite-form input,
+.invite-form select {
+  padding: 0.4rem 0.55rem;
+  border: 1px solid #c9cfdb;
+  border-radius: 6px;
+}
+
+.invite-form input {
+  flex: 1;
+  min-width: 14rem;
+}
+
+.invite-link {
+  background: #ecfdf3;
+  border: 1px solid #abefc6;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.invite-link p {
+  margin: 0 0 0.5rem;
+}
+
+.invite-link input {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c9cfdb;
+  border-radius: 6px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}
