@@ -8,6 +8,7 @@ import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { MembersPage } from './pages/MembersPage';
 import { MyTasksPage } from './pages/MyTasksPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { SignupPage } from './pages/SignupPage';
 import { WorkspacePage } from './pages/WorkspacePage';
 import { createQueryClient } from './queryClient';
@@ -31,6 +32,7 @@ export function App() {
                 <Route path="/w/:workspaceId/members" element={<MembersPage />} />
                 <Route path="/b/:boardId" element={<BoardPage />} />
                 <Route path="/my-tasks" element={<MyTasksPage />} />
+                <Route path="*" element={<NotFoundPage />} />
               </Route>
             </Route>
           </Routes>
