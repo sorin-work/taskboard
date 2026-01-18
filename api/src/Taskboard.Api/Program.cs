@@ -14,6 +14,7 @@ using Taskboard.Api.Features.Invitations;
 using Taskboard.Api.Features.Labels;
 using Taskboard.Api.Features.MyTasks;
 using Taskboard.Api.Features.Workspaces;
+using Taskboard.Api.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddTaskboardAuth(builder.Configuration);
 builder.Services.AddScoped<WorkspaceAccess>();
 builder.Services.AddScoped<ActivityLog>();
+builder.Services.AddScoped<DemoSeeder>();
 builder.Services.AddSingleton<IInvitationNotifier, LoggingInvitationNotifier>();
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
@@ -38,6 +40,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 await app.MigrateDatabaseAsync();
+
+if (app.Configuration.GetValue("SEED_DEMO", false))
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    await scope.ServiceProvider.GetRequiredService<DemoSeeder>().SeedAsync();
+}
 
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
