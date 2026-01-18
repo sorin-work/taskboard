@@ -35,7 +35,7 @@ export function Layout() {
           <NavLink to="/my-tasks">My tasks</NavLink>
         </nav>
         <div className="topbar-user">
-          <span>{user?.displayName}</span>
+          <Link to="/settings">{user?.displayName}</Link>
           <button onClick={signOut}>Sign out</button>
         </div>
       </header>

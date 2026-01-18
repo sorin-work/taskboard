@@ -1132,3 +1132,33 @@ a.button.primary {
   border-color: #2f5bd3;
   color: #fff;
 }
+
+/* Settings */
+.settings-page {
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+.settings-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  display: grid;
+  gap: 0.9rem;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 8%);
+}
+
+.settings-card h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.settings-card button {
+  justify-self: start;
+}
+
+.success {
+  color: #067647;
+  margin: 0;
+}
