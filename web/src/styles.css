@@ -1116,3 +1116,19 @@ button[aria-pressed='true'] {
   font-family: ui-monospace, monospace;
   font-size: 0.85rem;
 }
+
+a.button {
+  display: inline-block;
+  border: 1px solid #c9cfdb;
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+a.button.primary {
+  background: #2f5bd3;
+  border-color: #2f5bd3;
+  color: #fff;
+}

@@ -5,6 +5,7 @@ import { AuthProvider } from './auth/AuthContext';
 import { RedirectIfSignedIn, RequireAuth } from './auth/guards';
 import { BoardPage } from './pages/BoardPage';
 import { HomePage } from './pages/HomePage';
+import { InvitePage } from './pages/InvitePage';
 import { LoginPage } from './pages/LoginPage';
 import { MembersPage } from './pages/MembersPage';
 import { MyTasksPage } from './pages/MyTasksPage';
@@ -25,6 +26,7 @@ export function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
             </Route>
+            <Route path="/invite/:token" element={<InvitePage />} />
             <Route element={<RequireAuth />}>
               <Route element={<Layout />}>
                 <Route path="/" element={<HomePage />} />
