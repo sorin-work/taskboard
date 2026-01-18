@@ -108,4 +108,40 @@ public class AuthTests(TaskboardApiFactory factory) : IClassFixture<TaskboardApi
         var problem = await response.ReadAsAsync<ValidationProblemDetails>();
         problem.Errors.Should().ContainKey(field);
     }
+
+    [Fact]
+    public async Task UpdateMe_ChangesDisplayName()
+    {
+        var (client, _) = await factory.CreateUserAsync("before");
+
+        var response = await client.PatchAsJsonAsync("/api/auth/me", new UpdateProfileRequest("  After  "));
+
+        (await response.ReadAsAsync<UserDto>()).DisplayName.Should().Be("After");
+    }
+
+    [Fact]
+    public async Task ChangePassword_WithCorrectCurrentPassword_AllowsLoginWithNewOne()
+    {
+        var (client, user) = await factory.CreateUserAsync();
+
+        var response = await client.PostAsJsonAsync("/api/auth/me/password",
+            new ChangePasswordRequest(TestClients.Password, "a-brand-new-password"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await _client.PostAsJsonAsync("/api/auth/login", new LoginRequest(user.Email, TestClients.Password)))
+            .StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        (await _client.PostAsJsonAsync("/api/auth/login", new LoginRequest(user.Email, "a-brand-new-password")))
+            .StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task ChangePassword_WithWrongCurrentPassword_ReturnsBadRequest()
+    {
+        var (client, _) = await factory.CreateUserAsync();
+
+        var response = await client.PostAsJsonAsync("/api/auth/me/password",
+            new ChangePasswordRequest("not-it", "a-brand-new-password"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
 }

@@ -20,3 +20,20 @@ public sealed class LoginRequestValidator : AbstractValidator<LoginRequest>
         RuleFor(r => r.Password).NotEmpty();
     }
 }
+
+public sealed class UpdateProfileRequestValidator : AbstractValidator<UpdateProfileRequest>
+{
+    public UpdateProfileRequestValidator()
+    {
+        RuleFor(r => r.DisplayName).NotEmpty().MaximumLength(80);
+    }
+}
+
+public sealed class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>
+{
+    public ChangePasswordRequestValidator()
+    {
+        RuleFor(r => r.CurrentPassword).NotEmpty();
+        RuleFor(r => r.NewPassword).NotEmpty().MinimumLength(8).MaximumLength(128);
+    }
+}

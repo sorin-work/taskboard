@@ -17,6 +17,8 @@ public static class AuthEndpoints
         group.MapPost("/signup", SignupAsync).Validate<SignupRequest>();
         group.MapPost("/login", LoginAsync).Validate<LoginRequest>();
         group.MapGet("/me", GetMeAsync).RequireAuthorization();
+        group.MapPatch("/me", UpdateMeAsync).RequireAuthorization().Validate<UpdateProfileRequest>();
+        group.MapPost("/me/password", ChangePasswordAsync).RequireAuthorization().Validate<ChangePasswordRequest>();
 
         return app;
     }
@@ -73,5 +75,37 @@ public static class AuthEndpoints
         var user = await db.Users.FindAsync([userId], ct)
             ?? throw new UnauthorizedException("Your account no longer exists.");
         return UserDto.From(user);
+    }
+
+    private static async Task<UserDto> UpdateMeAsync(
+        UpdateProfileRequest request,
+        ClaimsPrincipal principal,
+        TaskboardDbContext db,
+        CancellationToken ct)
+    {
+        var user = await db.Users.FindAsync([principal.GetUserId()], ct)
+            ?? throw new UnauthorizedException("Your account no longer exists.");
+        user.DisplayName = request.DisplayName.Trim();
+        await db.SaveChangesAsync(ct);
+        return UserDto.From(user);
+    }
+
+    private static async Task<IResult> ChangePasswordAsync(
+        ChangePasswordRequest request,
+        ClaimsPrincipal principal,
+        TaskboardDbContext db,
+        IPasswordHasher<User> hasher,
+        CancellationToken ct)
+    {
+        var user = await db.Users.FindAsync([principal.GetUserId()], ct)
+            ?? throw new UnauthorizedException("Your account no longer exists.");
+        if (hasher.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword) == PasswordVerificationResult.Failed)
+        {
+            throw new BadRequestException("Your current password is not correct.");
+        }
+
+        user.PasswordHash = hasher.HashPassword(user, request.NewPassword);
+        await db.SaveChangesAsync(ct);
+        return Results.NoContent();
     }
 }
