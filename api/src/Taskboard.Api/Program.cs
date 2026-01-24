@@ -10,6 +10,7 @@ using Taskboard.Api.Features.Boards;
 using Taskboard.Api.Features.Cards;
 using Taskboard.Api.Features.Checklists;
 using Taskboard.Api.Features.Comments;
+using Taskboard.Api.Features.Health;
 using Taskboard.Api.Features.Invitations;
 using Taskboard.Api.Features.Labels;
 using Taskboard.Api.Features.MyTasks;
@@ -47,7 +48,7 @@ if (app.Configuration.GetValue("SEED_DEMO", false))
     await scope.ServiceProvider.GetRequiredService<DemoSeeder>().SeedAsync();
 }
 
-app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
+app.MapHealthEndpoints();
 app.MapAuthEndpoints();
 app.MapWorkspaceEndpoints();
 app.MapMemberEndpoints();

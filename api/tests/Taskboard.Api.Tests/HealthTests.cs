@@ -16,5 +16,6 @@ public class HealthTests(TaskboardApiFactory factory) : IClassFixture<TaskboardA
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
         body.Should().ContainKey("status").WhoseValue.Should().Be("ok");
+        body.Should().ContainKey("database").WhoseValue.Should().Be("ok");
     }
 }
