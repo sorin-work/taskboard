@@ -51,6 +51,21 @@ public class BoardTests(TaskboardApiFactory factory) : IClassFixture<TaskboardAp
     }
 
     [Fact]
+    public async Task List_CountsCardsPerBoard()
+    {
+        var (client, _) = await factory.CreateUserAsync();
+        var workspace = await client.CreateWorkspaceAsync();
+        var busy = await client.CreateBoardAsync(workspace.Id, "Busy");
+        await client.CreateBoardAsync(workspace.Id, "Empty");
+        await client.CreateCardAsync(busy.Columns[0].Id, "One");
+        await client.CreateCardAsync(busy.Columns[2].Id, "Two");
+
+        var boards = await client.GetFromJsonAsync<List<BoardSummaryDto>>($"/api/workspaces/{workspace.Id}/boards", TestJson.Options);
+
+        boards!.Select(b => (b.Name, b.CardCount)).Should().Equal(("Busy", 2), ("Empty", 0));
+    }
+
+    [Fact]
     public async Task Get_ByNonMember_ReturnsNotFound()
     {
         var (owner, _) = await factory.CreateUserAsync();

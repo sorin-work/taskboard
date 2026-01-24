@@ -45,7 +45,14 @@ public static class BoardEndpoints
 
         return await query
             .OrderBy(b => b.Name)
-            .Select(b => new BoardSummaryDto(b.Id, b.WorkspaceId, b.Name, b.Description, 0, b.CreatedAt, b.ArchivedAt))
+            .Select(b => new BoardSummaryDto(
+                b.Id,
+                b.WorkspaceId,
+                b.Name,
+                b.Description,
+                db.Cards.Count(c => c.BoardId == b.Id),
+                b.CreatedAt,
+                b.ArchivedAt))
             .ToListAsync(ct);
     }
 
