@@ -19,4 +19,19 @@ public class CardPositionsTests
     [Fact]
     public void Between_TwoCards_PicksMiddle() =>
         CardPositions.Between(1024, 2048).Should().Be(1536);
+
+    [Fact]
+    public void Between_AdjacentCards_HasNoRoom() =>
+        CardPositions.Between(1024, 1025).Should().BeNull();
+
+    [Fact]
+    public void Renumber_SpreadsPositionsOut()
+    {
+        var positions = new List<long> { 5, 6, 7 };
+
+        var result = new long[3];
+        CardPositions.Renumber(positions, (p, value) => result[positions.IndexOf(p)] = value);
+
+        result.Should().Equal(1024, 2048, 3072);
+    }
 }

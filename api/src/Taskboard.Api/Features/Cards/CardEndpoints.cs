@@ -90,7 +90,7 @@ public static class CardEndpoints
             BoardId = column.BoardId,
             ColumnId = column.Id,
             Title = request.Title.Trim(),
-            Position = CardPositions.Between(last, null),
+            Position = CardPositions.Between(last, null)!.Value,
             CreatedById = userId,
             CreatedAt = now,
             UpdatedAt = now,
@@ -216,6 +216,12 @@ public static class CardEndpoints
 
         long? before = index > 0 ? siblings[index - 1].Position : null;
         long? after = index < siblings.Count ? siblings[index].Position : null;
+        var position = CardPositions.Between(before, after);
+        if (position is null)
+        {
+            CardPositions.Renumber(siblings, (c, p) => c.Position = p);
+            position = CardPositions.Between(siblings[index - 1].Position, siblings[index].Position);
+        }
 
         if (card.ColumnId != column.Id)
         {
@@ -224,7 +230,7 @@ public static class CardEndpoints
         }
 
         card.ColumnId = column.Id;
-        card.Position = CardPositions.Between(before, after);
+        card.Position = position!.Value;
         card.UpdatedAt = clock.GetUtcNow().UtcDateTime;
         await db.SaveChangesAsync(ct);
 

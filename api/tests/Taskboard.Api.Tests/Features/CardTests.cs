@@ -128,6 +128,29 @@ public class CardTests(TaskboardApiFactory factory) : IClassFixture<TaskboardApi
     }
 
     [Fact]
+    public async Task Move_ManyTimesIntoTheSameGap_KeepsOrder()
+    {
+        var (client, board) = await BoardAsync();
+        var todo = board.Columns[0].Id;
+        var first = await client.CreateCardAsync(todo, "first");
+        await client.CreateCardAsync(todo, "last");
+
+        // Each move halves the gap after "first"; after ten there is no room left.
+        var expected = new List<string> { "first" };
+        for (var i = 0; i < 15; i++)
+        {
+            var card = await client.CreateCardAsync(board.Columns[1].Id, $"card {i}");
+            (await client.MoveCardAsync(card.Id, todo, first.Id)).EnsureSuccessStatusCode();
+            expected.Insert(1, $"card {i}");
+        }
+
+        expected.Add("last");
+        var cards = (await client.GetCardsAsync(board.Id)).Where(c => c.ColumnId == todo).ToList();
+        cards.Select(c => c.Title).Should().Equal(expected);
+        cards.Select(c => c.Position).Should().OnlyHaveUniqueItems();
+    }
+
+    [Fact]
     public async Task Move_AfterCardInOtherColumn_ReturnsBadRequest()
     {
         var (client, board) = await BoardAsync();
