@@ -38,6 +38,10 @@ describe('formatDue', () => {
     expect(formatDue('2026-01-09', today)).toBe('Yesterday');
   });
 
+  it('shows the same calendar day in every time zone', () => {
+    expect(formatDue('2026-02-03', today)).toBe('Feb 3');
+  });
+
   it('adds the year only when it differs', () => {
     expect(formatDue('2027-02-03', today)).toBe('Feb 3, 2027');
   });

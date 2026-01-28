@@ -12,6 +12,12 @@ export function addDays(iso: string, days: number): string {
   return date.toISOString().slice(0, 10);
 }
 
+/** Parses YYYY-MM-DD as a local calendar date (new Date('2026-02-03') would be UTC midnight). */
+export function parseDate(iso: string): Date {
+  const [year, month, day] = iso.split('-').map(Number);
+  return new Date(year!, month! - 1, day!);
+}
+
 export type DueStatus = 'done' | 'overdue' | 'today' | 'soon' | 'later';
 
 /** How urgent a due date is. "soon" means within the next two days. */
@@ -45,7 +51,7 @@ export function formatDue(dueDate: string, today: string): string {
   if (dueDate === addDays(today, -1)) {
     return 'Yesterday';
   }
-  const date = new Date(dueDate);
+  const date = parseDate(dueDate);
   const sameYear = dueDate.slice(0, 4) === today.slice(0, 4);
   return date.toLocaleDateString('en', {
     month: 'short',
