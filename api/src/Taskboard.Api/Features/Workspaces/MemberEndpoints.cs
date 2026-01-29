@@ -92,6 +92,12 @@ public static class MemberEndpoints
             await EnsureAnotherOwnerAsync(db, workspaceId, userId, ct);
         }
 
+        // Their cards stay, but they shouldn't show up as someone working on them.
+        var assignments = await db.CardAssignees
+            .Where(a => a.UserId == userId && a.Card.Board.WorkspaceId == workspaceId)
+            .ToListAsync(ct);
+        db.CardAssignees.RemoveRange(assignments);
+
         db.WorkspaceMembers.Remove(target);
         await db.SaveChangesAsync(ct);
         return Results.NoContent();

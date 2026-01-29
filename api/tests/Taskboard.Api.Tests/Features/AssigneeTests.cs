@@ -53,4 +53,27 @@ public class AssigneeTests(TaskboardApiFactory factory) : IClassFixture<Taskboar
 
         (await response.ReadAsAsync<CardDto>()).Assignees.Should().BeEmpty();
     }
+
+    [Fact]
+    public async Task RemovingAMember_UnassignsThemOnlyInThatWorkspace()
+    {
+        var (owner, ownerUser) = await factory.CreateUserAsync("Owen");
+        var (member, memberUser) = await factory.CreateUserAsync("Mia");
+        var workspace = await owner.CreateWorkspaceAsync("Shared");
+        factory.AddMember(workspace.Id, memberUser.Id);
+        var board = await owner.CreateBoardAsync(workspace.Id);
+        var card = await owner.CreateCardAsync(board.Columns[0].Id);
+        await owner.PutAsJsonAsync($"/api/cards/{card.Id}/assignees", new SetCardAssigneesRequest([ownerUser.Id, memberUser.Id]));
+        var own = await member.CreateWorkspaceAsync("Mia's");
+        var ownBoard = await member.CreateBoardAsync(own.Id);
+        var ownCard = await member.CreateCardAsync(ownBoard.Columns[0].Id);
+        await member.PutAsJsonAsync($"/api/cards/{ownCard.Id}/assignees", new SetCardAssigneesRequest([memberUser.Id]));
+
+        await owner.DeleteAsync($"/api/workspaces/{workspace.Id}/members/{memberUser.Id}");
+
+        var after = await owner.GetFromJsonAsync<CardDto>($"/api/cards/{card.Id}", TestJson.Options);
+        after!.Assignees.Select(a => a.Id).Should().Equal(ownerUser.Id);
+        var untouched = await member.GetFromJsonAsync<CardDto>($"/api/cards/{ownCard.Id}", TestJson.Options);
+        untouched!.Assignees.Should().ContainSingle();
+    }
 }
