@@ -58,6 +58,37 @@ npm install
 npm run dev                                            # http://localhost:5184
 ```
 
+## API overview
+
+Everything lives under `/api` and speaks JSON. Errors come back as
+[problem details](https://www.rfc-editor.org/rfc/rfc7807) with a `detail`
+message, and validation errors list each field under `errors`. All routes
+except sign up, sign in, health and invitation previews need an
+`Authorization: Bearer <token>` header.
+
+| Area        | Routes                                                                                   |
+| ----------- | ---------------------------------------------------------------------------------------- |
+| Auth        | `POST /auth/signup`, `POST /auth/login`, `GET/PATCH /auth/me`, `POST /auth/me/password`   |
+| Workspaces  | `GET/POST /workspaces`, `GET/PATCH/DELETE /workspaces/{id}`                              |
+| Members     | `GET /workspaces/{id}/members`, `PATCH/DELETE /workspaces/{id}/members/{userId}`          |
+| Invitations | `GET/POST /workspaces/{id}/invitations`, `DELETE .../{invitationId}`, `GET /invitations/{token}`, `POST /invitations/{token}/accept` |
+| Boards      | `GET/POST /workspaces/{id}/boards`, `GET/PATCH/DELETE /boards/{id}`                      |
+| Columns     | `POST /boards/{id}/columns`, `PATCH/DELETE /columns/{id}`, `POST /columns/{id}/move`     |
+| Cards       | `GET /boards/{id}/cards`, `POST /columns/{id}/cards`, `GET/PUT/DELETE /cards/{id}`, `POST /cards/{id}/move`, `PUT /cards/{id}/labels`, `PUT /cards/{id}/assignees` |
+| Labels      | `GET/POST /boards/{id}/labels`, `PATCH/DELETE /labels/{id}`                              |
+| Checklists  | `POST /cards/{id}/checklists`, `PATCH/DELETE /checklists/{id}`, `POST /checklists/{id}/items`, `PATCH/DELETE /checklist-items/{id}` |
+| Comments    | `GET/POST /cards/{id}/comments`, `PATCH/DELETE /comments/{id}`                           |
+| Activity    | `GET /boards/{id}/activity?before=&limit=`, `GET /cards/{id}/activity`                   |
+| My tasks    | `GET /me/tasks?due=&includeCompleted=`                                                   |
+
+`GET /boards/{id}/cards` and `GET /me/tasks` take the same filters:
+`assignee` (a user id, `me` or `none`), `label` (a label id), `due`
+(`overdue`, `today`, `week` or `none`) and `q` (text in the title).
+
+Roles: members can do everything with cards, columns, labels and comments;
+admins can also invite people, change roles, and archive or delete boards;
+owners can additionally delete the workspace and promote other owners.
+
 ## Tests
 
 ```bash
