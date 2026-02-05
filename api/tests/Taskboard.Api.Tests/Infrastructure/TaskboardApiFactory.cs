@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -18,6 +19,9 @@ public class TaskboardApiFactory : WebApplicationFactory<Program>
 {
     private readonly SqliteConnection _connection = new("DataSource=:memory:");
 
+    /// <summary>Tests sign up a lot of users from one "IP", so the limit is raised by default.</summary>
+    protected virtual int AuthPermitsPerMinute => 10_000;
+
     public TaskboardApiFactory()
     {
         _connection.Open();
@@ -29,6 +33,7 @@ public class TaskboardApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("ConnectionStrings:Default", "Host=unused");
         builder.UseSetting("Jwt:Secret", "test-secret-that-is-long-enough-0123456789");
         builder.UseSetting("Database:MigrateOnStartup", "false");
+        builder.UseSetting("RateLimiting:AuthPermitsPerMinute", AuthPermitsPerMinute.ToString(CultureInfo.InvariantCulture));
 
         builder.ConfigureTestServices(services =>
         {

@@ -26,6 +26,7 @@ builder.Services.AddTaskboardDatabase(builder.Configuration);
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddTaskboardAuth(builder.Configuration);
+builder.Services.AddTaskboardRateLimiting(builder.Configuration);
 builder.Services.AddScoped<WorkspaceAccess>();
 builder.Services.AddScoped<ActivityLog>();
 builder.Services.AddScoped<DemoSeeder>();
@@ -39,6 +40,7 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 await app.MigrateDatabaseAsync();
 

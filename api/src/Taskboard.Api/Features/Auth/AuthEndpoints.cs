@@ -14,8 +14,8 @@ public static class AuthEndpoints
     {
         var group = app.MapGroup("/api/auth").WithTags("Auth");
 
-        group.MapPost("/signup", SignupAsync).Validate<SignupRequest>();
-        group.MapPost("/login", LoginAsync).Validate<LoginRequest>();
+        group.MapPost("/signup", SignupAsync).Validate<SignupRequest>().RequireRateLimiting(RateLimiting.AuthPolicy);
+        group.MapPost("/login", LoginAsync).Validate<LoginRequest>().RequireRateLimiting(RateLimiting.AuthPolicy);
         group.MapGet("/me", GetMeAsync).RequireAuthorization();
         group.MapPatch("/me", UpdateMeAsync).RequireAuthorization().Validate<UpdateProfileRequest>();
         group.MapPost("/me/password", ChangePasswordAsync).RequireAuthorization().Validate<ChangePasswordRequest>();
