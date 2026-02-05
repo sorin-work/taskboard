@@ -75,9 +75,7 @@ public static class CardEndpoints
         CancellationToken ct)
     {
         var userId = principal.GetUserId();
-        var column = await db.Columns.SingleOrDefaultAsync(c => c.Id == columnId, ct)
-            ?? throw new NotFoundException("Column not found.");
-        await access.RequireBoardAsync(column.BoardId, userId, ct: ct);
+        var (column, _) = await access.RequireColumnAsync(columnId, userId, ct);
 
         var last = await db.Cards
             .Where(c => c.ColumnId == columnId)

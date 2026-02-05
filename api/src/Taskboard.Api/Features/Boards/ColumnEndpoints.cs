@@ -63,7 +63,7 @@ public static class ColumnEndpoints
         CancellationToken ct)
     {
         var userId = principal.GetUserId();
-        var column = await FindColumnAsync(db, access, columnId, userId, ct);
+        var column = (await access.RequireColumnAsync(columnId, userId, ct)).Column;
         var name = request.Name.Trim();
         if (name != column.Name)
         {
@@ -83,7 +83,7 @@ public static class ColumnEndpoints
         TaskboardDbContext db,
         CancellationToken ct)
     {
-        var column = await FindColumnAsync(db, access, columnId, principal.GetUserId(), ct);
+        var column = (await access.RequireColumnAsync(columnId, principal.GetUserId(), ct)).Column;
         var columns = await db.Columns.Where(c => c.BoardId == column.BoardId).OrderBy(c => c.Position).ToListAsync(ct);
 
         columns.Remove(column);
@@ -106,7 +106,7 @@ public static class ColumnEndpoints
         CancellationToken ct)
     {
         var userId = principal.GetUserId();
-        var column = await FindColumnAsync(db, access, columnId, userId, ct);
+        var column = (await access.RequireColumnAsync(columnId, userId, ct)).Column;
         activity.Board(column.BoardId, userId, ActivityTypes.ColumnDeleted, new() { ["column"] = column.Name });
 
         db.Columns.Remove(column);
@@ -121,26 +121,5 @@ public static class ColumnEndpoints
 
         await db.SaveChangesAsync(ct);
         return Results.NoContent();
-    }
-
-    private static async Task<BoardColumn> FindColumnAsync(
-        TaskboardDbContext db,
-        WorkspaceAccess access,
-        Guid columnId,
-        Guid userId,
-        CancellationToken ct)
-    {
-        var column = await db.Columns.SingleOrDefaultAsync(c => c.Id == columnId, ct)
-            ?? throw new NotFoundException("Column not found.");
-        try
-        {
-            await access.RequireBoardAsync(column.BoardId, userId, ct: ct);
-        }
-        catch (NotFoundException)
-        {
-            throw new NotFoundException("Column not found.");
-        }
-
-        return column;
     }
 }

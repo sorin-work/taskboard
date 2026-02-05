@@ -61,7 +61,7 @@ public static class LabelEndpoints
         TaskboardDbContext db,
         CancellationToken ct)
     {
-        var label = await FindLabelAsync(db, access, labelId, principal.GetUserId(), ct);
+        var label = (await access.RequireLabelAsync(labelId, principal.GetUserId(), ct)).Label;
         var name = request.Name.Trim();
         await EnsureUniqueNameAsync(db, label.BoardId, name, label.Id, ct);
 
@@ -78,7 +78,7 @@ public static class LabelEndpoints
         TaskboardDbContext db,
         CancellationToken ct)
     {
-        var label = await FindLabelAsync(db, access, labelId, principal.GetUserId(), ct);
+        var label = (await access.RequireLabelAsync(labelId, principal.GetUserId(), ct)).Label;
         db.Labels.Remove(label);
         await db.SaveChangesAsync(ct);
         return Results.NoContent();
@@ -102,21 +102,5 @@ public static class LabelEndpoints
         {
             throw new ConflictException($"This board already has a label called \"{name}\".");
         }
-    }
-
-    private static async Task<Label> FindLabelAsync(TaskboardDbContext db, WorkspaceAccess access, Guid labelId, Guid userId, CancellationToken ct)
-    {
-        var label = await db.Labels.SingleOrDefaultAsync(l => l.Id == labelId, ct)
-            ?? throw new NotFoundException("Label not found.");
-        try
-        {
-            await access.RequireBoardAsync(label.BoardId, userId, ct: ct);
-        }
-        catch (NotFoundException)
-        {
-            throw new NotFoundException("Label not found.");
-        }
-
-        return label;
     }
 }
