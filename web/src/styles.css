@@ -1162,3 +1162,17 @@ a.button.primary {
   color: #067647;
   margin: 0;
 }
+
+.empty-column {
+  border: 2px dashed #c9cfdb;
+  border-radius: 8px;
+  padding: 0.9rem;
+  text-align: center;
+  color: #98a2b3;
+  font-size: 0.85rem;
+}
+
+.empty-column.active {
+  border-color: #2f5bd3;
+  color: #2f5bd3;
+}

@@ -97,7 +97,14 @@ export function BoardColumn({
             />
           </li>
         ))}
-        {dropAt === cards.length && <li className="drop-indicator" aria-hidden />}
+        {cards.length === 0 && (
+          <li className={dropAt !== null ? 'empty-column active' : 'empty-column'}>
+            {draggingId ? 'Drop here' : 'No cards'}
+          </li>
+        )}
+        {cards.length > 0 && dropAt === cards.length && (
+          <li className="drop-indicator" aria-hidden />
+        )}
       </ol>
       <AddCardForm boardId={boardId} columnId={column.id} />
     </section>
