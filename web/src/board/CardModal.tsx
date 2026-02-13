@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { boardsApi } from '../api/boards';
 import { cardsApi } from '../api/cards';
 import type { CardUpdate } from '../api/cards';
 import type { Board, Card } from '../api/types';
@@ -56,8 +57,14 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
     },
   });
 
+  // Moving from the dialog drops the card at the bottom of the other column,
+  // which is what people expect from "send it to Done".
   const move = useMutation({
-    mutationFn: (columnId: string) => cardsApi.move(card.id, columnId, null),
+    mutationFn: async (columnId: string) => {
+      const cards = await boardsApi.cards(board.id);
+      const last = cards.filter((c) => c.columnId === columnId && c.id !== card.id).at(-1);
+      return cardsApi.move(card.id, columnId, last?.id ?? null);
+    },
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKeys.card(card.id), updated);
       refreshBoard();
