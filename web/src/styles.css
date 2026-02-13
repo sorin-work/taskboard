@@ -1176,3 +1176,20 @@ a.button.primary {
   border-color: #2f5bd3;
   color: #2f5bd3;
 }
+
+.avatar-stack {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
+.avatar-stack .avatar {
+  border: 2px solid #f4f5f8;
+  margin-left: -6px;
+}
+
+.avatar-stack .more {
+  margin-left: 0.3rem;
+  font-size: 0.8rem;
+  color: #667085;
+}

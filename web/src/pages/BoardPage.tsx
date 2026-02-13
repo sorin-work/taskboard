@@ -11,6 +11,7 @@ import { BoardColumn } from '../board/BoardColumn';
 import { CardModal } from '../board/CardModal';
 import { FilterBar } from '../board/FilterBar';
 import { LabelManager } from '../board/LabelManager';
+import { Avatar } from '../components/Avatar';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { activeFilterCount, readFilters, writeFilters } from '../lib/filters';
 import { groupByColumn, isNoopMove, moveCard } from '../lib/ordering';
@@ -110,7 +111,15 @@ export function BoardPage() {
           <h1>{board.data.name}</h1>
           {board.data.description && <p className="muted">{board.data.description}</p>}
         </div>
-        <div className="row">
+        <div className="row board-actions">
+          <span className="avatar-stack" aria-label="Board members">
+            {board.data.members.slice(0, 6).map((m) => (
+              <Avatar key={m.userId} id={m.userId} name={m.displayName} size={28} />
+            ))}
+            {board.data.members.length > 6 && (
+              <span className="more">+{board.data.members.length - 6}</span>
+            )}
+          </span>
           <button type="button" onClick={() => setShowLabels(true)}>
             Labels
           </button>
