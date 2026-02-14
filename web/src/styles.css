@@ -1232,3 +1232,12 @@ a.button.primary {
     flex-basis: 85vw;
   }
 }
+
+.count.over-limit {
+  color: #b42318;
+  font-weight: 600;
+}
+
+.board-column.over-limit {
+  box-shadow: inset 0 3px 0 #f04438;
+}

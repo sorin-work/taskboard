@@ -31,6 +31,10 @@ export function ColumnHeader({ boardId, column, columnCount, cardCount }: Column
     mutationFn: (position: number) => boardsApi.moveColumn(column.id, position),
     onSuccess: refresh,
   });
+  const setWipLimit = useMutation({
+    mutationFn: (limit: number | null) => boardsApi.setWipLimit(column.id, limit),
+    onSuccess: refresh,
+  });
   const remove = useMutation({
     mutationFn: () => boardsApi.deleteColumn(column.id),
     onSuccess: () => {
@@ -59,6 +63,25 @@ export function ColumnHeader({ boardId, column, columnCount, cardCount }: Column
     }
   }
 
+  function promptWipLimit() {
+    setMenuOpen(false);
+    const answer = window.prompt(
+      'Maximum number of cards in this column (leave empty for no limit):',
+      column.wipLimit?.toString() ?? '',
+    );
+    if (answer === null) {
+      return;
+    }
+    const limit = answer.trim() === '' ? null : Number.parseInt(answer, 10);
+    if (limit !== null && (Number.isNaN(limit) || limit < 1 || limit > 99)) {
+      window.alert('Enter a number from 1 to 99.');
+      return;
+    }
+    setWipLimit.mutate(limit);
+  }
+
+  const overLimit = column.wipLimit !== null && cardCount > column.wipLimit;
+
   return (
     <header className="column-header">
       {editing ? (
@@ -76,7 +99,12 @@ export function ColumnHeader({ boardId, column, columnCount, cardCount }: Column
       ) : (
         <h2 onDoubleClick={() => setEditing(true)}>{column.name}</h2>
       )}
-      <span className="count">{cardCount}</span>
+      <span
+        className={overLimit ? 'count over-limit' : 'count'}
+        title={overLimit ? `Over the limit of ${column.wipLimit}` : undefined}
+      >
+        {column.wipLimit !== null ? `${cardCount} / ${column.wipLimit}` : cardCount}
+      </span>
       <div className="menu">
         <button
           type="button"
@@ -119,13 +147,16 @@ export function ColumnHeader({ boardId, column, columnCount, cardCount }: Column
             >
               Move right
             </button>
+            <button role="menuitem" onClick={promptWipLimit}>
+              {column.wipLimit === null ? 'Set WIP limit…' : 'Change WIP limit…'}
+            </button>
             <button role="menuitem" className="danger" onClick={confirmDelete}>
               Delete column
             </button>
           </div>
         )}
       </div>
-      <ErrorMessage error={rename.error ?? move.error ?? remove.error} />
+      <ErrorMessage error={rename.error ?? move.error ?? setWipLimit.error ?? remove.error} />
     </header>
   );
 }

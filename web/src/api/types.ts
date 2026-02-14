@@ -67,6 +67,7 @@ export interface Column {
   id: string;
   name: string;
   position: number;
+  wipLimit: number | null;
 }
 
 export type LabelColor =

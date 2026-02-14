@@ -15,8 +15,8 @@ const board: Board = {
   createdAt: '',
   archivedAt: null,
   columns: [
-    { id: 'todo', name: 'To do', position: 0 },
-    { id: 'done', name: 'Done', position: 1 },
+    { id: 'todo', name: 'To do', position: 0, wipLimit: null },
+    { id: 'done', name: 'Done', position: 1, wipLimit: null },
   ],
   labels: [],
   members: [],

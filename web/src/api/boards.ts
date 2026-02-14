@@ -53,6 +53,8 @@ export const boardsApi = {
     api<Column>(`/columns/${columnId}`, { method: 'PATCH', body: { name } }),
   moveColumn: (columnId: string, position: number) =>
     api<Column[]>(`/columns/${columnId}/move`, { method: 'POST', body: { position } }),
+  setWipLimit: (columnId: string, limit: number | null) =>
+    api<Column>(`/columns/${columnId}/wip-limit`, { method: 'PUT', body: { limit } }),
   deleteColumn: (columnId: string) => api<void>(`/columns/${columnId}`, { method: 'DELETE' }),
 
   createLabel: (boardId: string, name: string, color: LabelColor) =>

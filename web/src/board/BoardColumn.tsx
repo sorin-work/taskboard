@@ -66,7 +66,13 @@ export function BoardColumn({
 
   return (
     <section
-      className={dropAt !== null ? 'board-column drop-target' : 'board-column'}
+      className={[
+        'board-column',
+        dropAt !== null && 'drop-target',
+        column.wipLimit !== null && cards.length > column.wipLimit && 'over-limit',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       aria-label={column.name}
       onDragOver={handleDragOver}
       onDragLeave={(e) => {
