@@ -80,4 +80,44 @@ public class ColumnTests(TaskboardApiFactory factory) : IClassFixture<TaskboardA
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
+
+    [Fact]
+    public async Task WipLimit_CanBeSetAndCleared()
+    {
+        var (client, board) = await BoardAsync("Doing");
+        var column = board.Columns[0];
+
+        var set = await client.PutAsJsonAsync($"/api/columns/{column.Id}/wip-limit", new SetWipLimitRequest(3));
+        var afterSet = await client.GetFromJsonAsync<BoardDto>($"/api/boards/{board.Id}", TestJson.Options);
+        var cleared = await client.PutAsJsonAsync($"/api/columns/{column.Id}/wip-limit", new SetWipLimitRequest(null));
+
+        (await set.ReadAsAsync<ColumnDto>()).WipLimit.Should().Be(3);
+        afterSet!.Columns[0].WipLimit.Should().Be(3);
+        (await cleared.ReadAsAsync<ColumnDto>()).WipLimit.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(100)]
+    public async Task WipLimit_OutOfRange_ReturnsBadRequest(int limit)
+    {
+        var (client, board) = await BoardAsync("Doing");
+
+        var response = await client.PutAsJsonAsync($"/api/columns/{board.Columns[0].Id}/wip-limit", new SetWipLimitRequest(limit));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task WipLimit_DoesNotBlockAddingCards()
+    {
+        var (client, board) = await BoardAsync("Doing");
+        var column = board.Columns[0];
+        await client.PutAsJsonAsync($"/api/columns/{column.Id}/wip-limit", new SetWipLimitRequest(1));
+
+        await client.CreateCardAsync(column.Id, "One");
+        var second = await client.PostAsJsonAsync($"/api/columns/{column.Id}/cards", new Taskboard.Api.Features.Cards.CreateCardRequest("Two"));
+
+        second.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
 }
