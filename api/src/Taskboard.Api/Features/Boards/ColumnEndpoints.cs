@@ -23,6 +23,7 @@ public static class ColumnEndpoints
         var column = app.MapGroup("/api/columns/{columnId:guid}").WithTags("Columns").RequireAuthorization();
         column.MapPatch("/", RenameAsync).Validate<UpdateColumnRequest>();
         column.MapPost("/move", MoveAsync).Validate<MoveColumnRequest>();
+        column.MapPut("/wip-limit", SetWipLimitAsync).Validate<SetWipLimitRequest>();
         column.MapDelete("/", DeleteAsync);
 
         return app;
@@ -50,7 +51,7 @@ public static class ColumnEndpoints
         activity.Board(board.Id, userId, ActivityTypes.ColumnCreated, new() { ["column"] = column.Name });
         await db.SaveChangesAsync(ct);
 
-        return Results.Created($"/api/columns/{column.Id}", new ColumnDto(column.Id, column.Name, column.Position));
+        return Results.Created($"/api/columns/{column.Id}", ColumnDto.From(column));
     }
 
     private static async Task<ColumnDto> RenameAsync(
@@ -72,7 +73,7 @@ public static class ColumnEndpoints
 
         column.Name = name;
         await db.SaveChangesAsync(ct);
-        return new ColumnDto(column.Id, column.Name, column.Position);
+        return ColumnDto.From(column);
     }
 
     private static async Task<List<ColumnDto>> MoveAsync(
@@ -94,7 +95,21 @@ public static class ColumnEndpoints
         }
 
         await db.SaveChangesAsync(ct);
-        return [.. columns.Select(c => new ColumnDto(c.Id, c.Name, c.Position))];
+        return [.. columns.Select(ColumnDto.From)];
+    }
+
+    private static async Task<ColumnDto> SetWipLimitAsync(
+        Guid columnId,
+        SetWipLimitRequest request,
+        ClaimsPrincipal principal,
+        WorkspaceAccess access,
+        TaskboardDbContext db,
+        CancellationToken ct)
+    {
+        var column = (await access.RequireColumnAsync(columnId, principal.GetUserId(), ct)).Column;
+        column.WipLimit = request.Limit;
+        await db.SaveChangesAsync(ct);
+        return ColumnDto.From(column);
     }
 
     private static async Task<IResult> DeleteAsync(

@@ -157,7 +157,7 @@ public static class BoardEndpoints
             role,
             board.CreatedAt,
             board.ArchivedAt,
-            [.. board.Columns.OrderBy(c => c.Position).Select(c => new ColumnDto(c.Id, c.Name, c.Position))],
+            [.. board.Columns.OrderBy(c => c.Position).Select(ColumnDto.From)],
             await LabelEndpoints.ForBoardAsync(db, board.Id, ct),
             members);
     }

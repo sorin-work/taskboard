@@ -45,3 +45,11 @@ public sealed class MoveColumnRequestValidator : AbstractValidator<MoveColumnReq
         RuleFor(r => r.Position).GreaterThanOrEqualTo(0);
     }
 }
+
+public sealed class SetWipLimitRequestValidator : AbstractValidator<SetWipLimitRequest>
+{
+    public SetWipLimitRequestValidator()
+    {
+        RuleFor(r => r.Limit).InclusiveBetween(1, 99).When(r => r.Limit is not null);
+    }
+}

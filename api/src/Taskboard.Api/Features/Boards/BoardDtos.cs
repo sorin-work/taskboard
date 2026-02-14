@@ -16,7 +16,10 @@ public sealed record BoardSummaryDto(
     DateTime CreatedAt,
     DateTime? ArchivedAt);
 
-public sealed record ColumnDto(Guid Id, string Name, int Position);
+public sealed record ColumnDto(Guid Id, string Name, int Position, int? WipLimit)
+{
+    public static ColumnDto From(BoardColumn column) => new(column.Id, column.Name, column.Position, column.WipLimit);
+}
 
 public sealed record BoardMemberDto(Guid UserId, string DisplayName, string Email);
 
@@ -38,3 +41,5 @@ public sealed record CreateColumnRequest(string Name);
 public sealed record UpdateColumnRequest(string Name);
 
 public sealed record MoveColumnRequest(int Position);
+
+public sealed record SetWipLimitRequest(int? Limit);

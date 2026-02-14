@@ -133,6 +133,10 @@ namespace Taskboard.Api.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("position");
 
+                    b.Property<int?>("WipLimit")
+                        .HasColumnType("integer")
+                        .HasColumnName("wip_limit");
+
                     b.HasKey("Id")
                         .HasName("pk_board_columns");
 

@@ -12,4 +12,7 @@ public class BoardColumn
 
     /// <summary>Zero-based, contiguous within a board.</summary>
     public int Position { get; set; }
+
+    /// <summary>Soft work-in-progress limit. The board warns when it's exceeded; nothing is blocked.</summary>
+    public int? WipLimit { get; set; }
 }
