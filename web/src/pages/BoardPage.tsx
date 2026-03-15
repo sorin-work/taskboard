@@ -8,6 +8,7 @@ import type { CardSummary } from '../api/types';
 import { AddColumnForm } from '../board/AddColumnForm';
 import { BoardActivityPanel } from '../board/BoardActivityPanel';
 import { BoardColumn } from '../board/BoardColumn';
+import { BoardSettings } from '../board/BoardSettings';
 import { CardModal } from '../board/CardModal';
 import { FilterBar } from '../board/FilterBar';
 import { LabelManager } from '../board/LabelManager';
@@ -31,6 +32,7 @@ export function BoardPage() {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [showLabels, setShowLabels] = useState(false);
   const [showActivity, setShowActivity] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const board = useQuery({
     queryKey: queryKeys.board(boardId),
@@ -108,7 +110,10 @@ export function BoardPage() {
           <Link to={`/w/${board.data.workspaceId}`} className="muted">
             {board.data.workspaceName}
           </Link>
-          <h1>{board.data.name}</h1>
+          <h1>
+            {board.data.name}
+            {board.data.archivedAt && <span className="archived-badge">Archived</span>}
+          </h1>
           {board.data.description && <p className="muted">{board.data.description}</p>}
         </div>
         <div className="row board-actions">
@@ -129,6 +134,9 @@ export function BoardPage() {
             onClick={() => setShowActivity((open) => !open)}
           >
             Activity
+          </button>
+          <button type="button" onClick={() => setShowSettings(true)}>
+            Settings
           </button>
         </div>
       </header>
@@ -167,6 +175,7 @@ export function BoardPage() {
           />
         )}
       </div>
+      {showSettings && <BoardSettings board={board.data} onClose={() => setShowSettings(false)} />}
       {showLabels && <LabelManager board={board.data} onClose={() => setShowLabels(false)} />}
       {openCardId && (
         <CardModal
