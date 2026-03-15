@@ -48,6 +48,80 @@ export function MembersPage() {
         ))}
       </ul>
       {canManage && <Invitations workspaceId={workspaceId} myRole={myRole} />}
+      {canManage && workspace.data && (
+        <WorkspaceSettings workspaceId={workspaceId} name={workspace.data.name} myRole={myRole} />
+      )}
+    </section>
+  );
+}
+
+function WorkspaceSettings({
+  workspaceId,
+  name: currentName,
+  myRole,
+}: {
+  workspaceId: string;
+  name: string;
+  myRole: Role;
+}) {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [name, setName] = useState(currentName);
+  const rename = useMutation({
+    mutationFn: () => workspacesApi.rename(workspaceId, name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.workspaces });
+    },
+  });
+  const remove = useMutation({
+    mutationFn: () => workspacesApi.remove(workspaceId),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.workspace(workspaceId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.workspaces });
+      navigate('/', { replace: true });
+    },
+  });
+
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    rename.mutate();
+  }
+
+  return (
+    <section className="workspace-settings">
+      <h2>Workspace</h2>
+      <form className="invite-form" onSubmit={submit}>
+        <input
+          aria-label="Workspace name"
+          value={name}
+          maxLength={80}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <button disabled={rename.isPending || name.trim() === currentName}>Rename</button>
+      </form>
+      <ErrorMessage error={rename.error ?? remove.error} />
+      {myRole === 'owner' && (
+        <div className="danger-zone">
+          <h3>Delete workspace</h3>
+          <p className="muted small">
+            Deletes every board, card and comment in it for everyone. This can't be undone.
+          </p>
+          <button
+            type="button"
+            className="danger"
+            disabled={remove.isPending}
+            onClick={() => {
+              const typed = window.prompt(`Type the workspace name (${currentName}) to delete it:`);
+              if (typed?.trim() === currentName) {
+                remove.mutate();
+              }
+            }}
+          >
+            Delete workspace
+          </button>
+        </div>
+      )}
     </section>
   );
 }

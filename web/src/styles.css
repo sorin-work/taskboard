@@ -1279,3 +1279,7 @@ a.button.primary {
   border-radius: 4px;
   padding: 0.1rem 0.4rem;
 }
+
+.workspace-settings {
+  margin-top: 2rem;
+}
