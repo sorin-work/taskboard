@@ -115,4 +115,47 @@ public class ActivityTests(TaskboardApiFactory factory) : IClassFixture<Taskboar
         second.Select(a => a.Id).Should().NotIntersectWith(first.Select(a => a.Id));
         first.Concat(second).Should().HaveCount(6);
     }
+
+    [Fact]
+    public async Task Feed_PagesThroughEntriesWithTheSameTimestamp()
+    {
+        var (client, board) = await BoardAsync();
+        var actorId = factory.WithDb(db => db.WorkspaceMembers.First(m => m.WorkspaceId == board.WorkspaceId).UserId);
+        var sameMoment = DateTime.UtcNow.AddMinutes(-5);
+        factory.WithDb(db =>
+        {
+            for (var i = 0; i < 5; i++)
+            {
+                db.Activities.Add(new Domain.Activity
+                {
+                    Id = Guid.NewGuid(),
+                    BoardId = board.Id,
+                    ActorId = actorId,
+                    Type = ActivityTypes.ColumnCreated,
+                    Data = new() { ["column"] = $"Imported {i}" },
+                    CreatedAt = sameMoment,
+                });
+            }
+
+            return db.SaveChanges();
+        });
+
+        var seen = new List<ActivityDto>();
+        var query = "?limit=2";
+        for (var page = 0; page < 10; page++)
+        {
+            var items = await BoardActivityAsync(client, board.Id, query);
+            seen.AddRange(items);
+            if (items.Count < 2)
+            {
+                break;
+            }
+
+            var last = items[^1];
+            query = $"?limit=2&before={Uri.EscapeDataString(last.CreatedAt.ToString("O"))}&beforeId={last.Id}";
+        }
+
+        seen.Select(a => a.Id).Should().OnlyHaveUniqueItems();
+        seen.Should().HaveCount(6); // the five imports plus board.created
+    }
 }

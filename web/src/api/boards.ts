@@ -44,8 +44,10 @@ export const boardsApi = {
 
   cards: (boardId: string, filters: CardFilters = {}) =>
     api<CardSummary[]>(`/boards/${boardId}/cards${toQuery({ ...filters })}`),
-  activity: (boardId: string, before?: string) =>
-    api<Activity[]>(`/boards/${boardId}/activity${toQuery({ before })}`),
+  activity: (boardId: string, before?: { createdAt: string; id: string }) =>
+    api<Activity[]>(
+      `/boards/${boardId}/activity${toQuery({ before: before?.createdAt, beforeId: before?.id })}`,
+    ),
 
   addColumn: (boardId: string, name: string) =>
     api<Column>(`/boards/${boardId}/columns`, { method: 'POST', body: { name } }),

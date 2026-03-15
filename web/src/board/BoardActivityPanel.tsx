@@ -16,9 +16,13 @@ export function BoardActivityPanel({ boardId, onClose, onOpenCard }: BoardActivi
   const activity = useInfiniteQuery({
     queryKey: queryKeys.boardActivity(boardId),
     queryFn: ({ pageParam }) => boardsApi.activity(boardId, pageParam),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) =>
-      lastPage.length < PAGE_SIZE ? undefined : lastPage.at(-1)?.createdAt,
+    initialPageParam: undefined as { createdAt: string; id: string } | undefined,
+    getNextPageParam: (lastPage) => {
+      const last = lastPage.at(-1);
+      return lastPage.length < PAGE_SIZE || !last
+        ? undefined
+        : { createdAt: last.createdAt, id: last.id };
+    },
   });
 
   return (

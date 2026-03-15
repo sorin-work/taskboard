@@ -28,10 +28,15 @@ public static class ActivityEndpoints
         return app;
     }
 
-    /// <summary>Newest first. Pass the oldest createdAt you have as <paramref name="before"/> to get the next page.</summary>
+    /// <summary>
+    /// Newest first. To get the next page pass the last entry you have as
+    /// <paramref name="before"/> (its createdAt) and <paramref name="beforeId"/>.
+    /// The id matters when several entries share a timestamp.
+    /// </summary>
     private static async Task<List<ActivityDto>> BoardAsync(
         Guid boardId,
         DateTime? before,
+        Guid? beforeId,
         int? limit,
         ClaimsPrincipal principal,
         WorkspaceAccess access,
@@ -39,14 +44,27 @@ public static class ActivityEndpoints
         CancellationToken ct)
     {
         await access.RequireBoardAsync(boardId, principal.GetUserId(), ct: ct);
+        var pageSize = Math.Clamp(limit ?? DefaultPageSize, 1, MaxPageSize);
         var query = db.Activities.Where(a => a.BoardId == boardId);
-        if (before is { } cursor)
+        if (before is not { } cursor)
         {
-            var utc = cursor.ToUniversalTime();
-            query = query.Where(a => a.CreatedAt < utc);
+            return await ProjectAsync(query, pageSize, ct);
         }
 
-        return await ProjectAsync(query, Math.Clamp(limit ?? DefaultPageSize, 1, MaxPageSize), ct);
+        var utc = cursor.ToUniversalTime();
+        if (beforeId is not { } cursorId)
+        {
+            return await ProjectAsync(query.Where(a => a.CreatedAt < utc), pageSize, ct);
+        }
+
+        // Entries at exactly the cursor time come back in the same order as on
+        // the previous page, so skip up to and including the cursor entry.
+        var ties = await query.CountAsync(a => a.CreatedAt == utc, ct);
+        var rows = await ProjectAsync(query.Where(a => a.CreatedAt <= utc), pageSize + ties, ct);
+        var index = rows.FindIndex(a => a.Id == cursorId);
+        return index < 0
+            ? [.. rows.Where(a => a.CreatedAt < utc).Take(pageSize)]
+            : [.. rows.Skip(index + 1).Take(pageSize)];
     }
 
     private static async Task<List<ActivityDto>> CardAsync(
