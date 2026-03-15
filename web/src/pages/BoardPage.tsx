@@ -140,7 +140,7 @@ export function BoardPage() {
           </button>
         </div>
       </header>
-      <FilterBar board={board.data} filters={filters} onChange={setFilters} />
+      <FilterBar key={boardId} board={board.data} filters={filters} onChange={setFilters} />
       {activeFilterCount(filters) > 0 && cards.data && (
         <p className="muted small filter-summary">
           Showing {cards.data.length} matching {cards.data.length === 1 ? 'card' : 'cards'}
