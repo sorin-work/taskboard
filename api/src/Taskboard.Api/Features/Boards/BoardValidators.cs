@@ -53,3 +53,11 @@ public sealed class SetWipLimitRequestValidator : AbstractValidator<SetWipLimitR
         RuleFor(r => r.Limit).InclusiveBetween(1, 99).When(r => r.Limit is not null);
     }
 }
+
+public sealed class CopyBoardRequestValidator : AbstractValidator<CopyBoardRequest>
+{
+    public CopyBoardRequestValidator()
+    {
+        RuleFor(r => r.Name).NotEmpty().MaximumLength(100);
+    }
+}

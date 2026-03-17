@@ -5,6 +5,8 @@ namespace Taskboard.Api.Features.Boards;
 
 public sealed record CreateBoardRequest(string Name, string? Description, IReadOnlyList<string>? Columns);
 
+public sealed record CopyBoardRequest(string Name, bool IncludeCards);
+
 public sealed record UpdateBoardRequest(string Name, string? Description, bool Archived);
 
 public sealed record BoardSummaryDto(

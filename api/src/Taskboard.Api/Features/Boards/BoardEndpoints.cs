@@ -24,6 +24,7 @@ public static class BoardEndpoints
         board.MapGet("/", GetAsync);
         board.MapPatch("/", UpdateAsync).Validate<UpdateBoardRequest>();
         board.MapDelete("/", DeleteAsync);
+        board.MapPost("/copy", CopyAsync).Validate<CopyBoardRequest>();
 
         return app;
     }
@@ -131,6 +132,92 @@ public static class BoardEndpoints
         db.Boards.Remove(board);
         await db.SaveChangesAsync(ct);
         return Results.NoContent();
+    }
+
+    /// <summary>
+    /// Copies columns and labels, and optionally the cards with their labels
+    /// and checklists. People, comments and history stay with the original.
+    /// </summary>
+    private static async Task<IResult> CopyAsync(
+        Guid boardId,
+        CopyBoardRequest request,
+        ClaimsPrincipal principal,
+        WorkspaceAccess access,
+        TaskboardDbContext db,
+        ActivityLog activity,
+        TimeProvider clock,
+        CancellationToken ct)
+    {
+        var userId = principal.GetUserId();
+        var (source, member) = await access.RequireBoardAsync(boardId, userId, ct: ct);
+        var now = clock.GetUtcNow().UtcDateTime;
+
+        var columns = await db.Columns.AsNoTracking().Where(c => c.BoardId == source.Id).OrderBy(c => c.Position).ToListAsync(ct);
+        var labels = await db.Labels.AsNoTracking().Where(l => l.BoardId == source.Id).ToListAsync(ct);
+
+        var copy = new Board
+        {
+            Id = Guid.NewGuid(),
+            WorkspaceId = source.WorkspaceId,
+            Name = request.Name.Trim(),
+            Description = source.Description,
+            CreatedAt = now,
+        };
+        var columnMap = columns.ToDictionary(c => c.Id, c => new BoardColumn
+        {
+            Id = Guid.NewGuid(),
+            BoardId = copy.Id,
+            Name = c.Name,
+            Position = c.Position,
+            WipLimit = c.WipLimit,
+        });
+        var labelMap = labels.ToDictionary(l => l.Id, l => new Label { Id = Guid.NewGuid(), BoardId = copy.Id, Name = l.Name, Color = l.Color });
+        copy.Columns = [.. columnMap.Values];
+        db.Boards.Add(copy);
+        db.Labels.AddRange(labelMap.Values);
+
+        if (request.IncludeCards)
+        {
+            var cards = await db.Cards
+                .AsNoTracking()
+                .Include(c => c.Labels)
+                .Include(c => c.Checklists).ThenInclude(l => l.Items)
+                .Where(c => c.BoardId == source.Id)
+                .AsSplitQuery()
+                .ToListAsync(ct);
+            foreach (var card in cards)
+            {
+                var cardId = Guid.NewGuid();
+                db.Cards.Add(new Card
+                {
+                    Id = cardId,
+                    BoardId = copy.Id,
+                    ColumnId = columnMap[card.ColumnId].Id,
+                    Title = card.Title,
+                    Description = card.Description,
+                    Position = card.Position,
+                    DueDate = card.DueDate,
+                    CompletedAt = card.CompletedAt,
+                    CreatedById = userId,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    Labels = [.. card.Labels.Select(l => new CardLabel { CardId = cardId, LabelId = labelMap[l.LabelId].Id })],
+                    Checklists = [.. card.Checklists.Select(l => new Checklist
+                    {
+                        Id = Guid.NewGuid(),
+                        CardId = cardId,
+                        Title = l.Title,
+                        Position = l.Position,
+                        Items = [.. l.Items.Select(i => new ChecklistItem { Id = Guid.NewGuid(), Text = i.Text, IsDone = i.IsDone, Position = i.Position })],
+                    })],
+                });
+            }
+        }
+
+        activity.Board(copy.Id, userId, ActivityTypes.BoardCreated, new() { ["board"] = copy.Name, ["copiedFrom"] = source.Name });
+        await db.SaveChangesAsync(ct);
+
+        return Results.Created($"/api/boards/{copy.Id}", await LoadBoardAsync(db, copy.Id, member.Role, ct));
     }
 
     internal static async Task<BoardDto> LoadBoardAsync(TaskboardDbContext db, Guid boardId, WorkspaceRole role, CancellationToken ct)
