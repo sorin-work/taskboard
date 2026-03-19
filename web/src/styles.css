@@ -1283,3 +1283,27 @@ a.button.primary {
 .workspace-settings {
   margin-top: 2rem;
 }
+
+.copy-board {
+  margin-top: 1.5rem;
+  border-top: 1px solid #eaecf0;
+  padding-top: 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.copy-board h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.copy-board p {
+  margin: 0;
+}
+
+.copy-board input:not([type='checkbox']) {
+  flex: 1;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid #c9cfdb;
+  border-radius: 6px;
+}

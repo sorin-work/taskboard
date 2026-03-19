@@ -41,6 +41,8 @@ export const boardsApi = {
   update: (boardId: string, body: { name: string; description: string; archived: boolean }) =>
     api<Board>(`/boards/${boardId}`, { method: 'PATCH', body }),
   remove: (boardId: string) => api<void>(`/boards/${boardId}`, { method: 'DELETE' }),
+  copy: (boardId: string, name: string, includeCards: boolean) =>
+    api<Board>(`/boards/${boardId}/copy`, { method: 'POST', body: { name, includeCards } }),
 
   cards: (boardId: string, filters: CardFilters = {}) =>
     api<CardSummary[]>(`/boards/${boardId}/cards${toQuery({ ...filters })}`),

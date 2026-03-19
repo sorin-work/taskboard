@@ -76,6 +76,8 @@ export function BoardSettings({ board, onClose }: { board: Board; onClose: () =>
         </div>
       </form>
 
+      <CopyBoard board={board} />
+
       {canAdminister && (
         <section className="danger-zone">
           <h3>Archive or delete</h3>
@@ -102,5 +104,52 @@ export function BoardSettings({ board, onClose }: { board: Board; onClose: () =>
         </section>
       )}
     </Modal>
+  );
+}
+
+function CopyBoard({ board }: { board: Board }) {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [name, setName] = useState(`${board.name} (copy)`);
+  const [includeCards, setIncludeCards] = useState(false);
+  const copy = useMutation({
+    mutationFn: () => boardsApi.copy(board.id, name, includeCards),
+    onSuccess: (created) => {
+      queryClient.invalidateQueries({ queryKey: ['workspaces', board.workspaceId, 'boards'] });
+      navigate(`/b/${created.id}`);
+    },
+  });
+
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    copy.mutate();
+  }
+
+  return (
+    <form className="copy-board" onSubmit={submit}>
+      <h3>Make a copy</h3>
+      <p className="muted small">
+        Copies the columns and labels. Assignees, comments and history aren't copied.
+      </p>
+      <div className="row">
+        <input
+          aria-label="Name of the copy"
+          value={name}
+          maxLength={100}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <button disabled={copy.isPending}>Copy board</button>
+      </div>
+      <label className="checkbox">
+        <input
+          type="checkbox"
+          checked={includeCards}
+          onChange={(e) => setIncludeCards(e.target.checked)}
+        />
+        Include cards and their checklists
+      </label>
+      <ErrorMessage error={copy.error} />
+    </form>
   );
 }
