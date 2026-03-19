@@ -2,6 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using Taskboard.Api.Domain;
 using Taskboard.Api.Features.Boards;
+using Taskboard.Api.Features.Cards;
+using Taskboard.Api.Features.Checklists;
+using Taskboard.Api.Features.Labels;
 using Taskboard.Api.Tests.Infrastructure;
 
 namespace Taskboard.Api.Tests.Features;
@@ -131,5 +134,62 @@ public class BoardTests(TaskboardApiFactory factory) : IClassFixture<TaskboardAp
         var response = await client.PostAsJsonAsync($"/api/workspaces/{workspace.Id}/boards", new CreateBoardRequest("", null, null));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Copy_WithoutCards_CopiesColumnsAndLabels()
+    {
+        var (client, _) = await factory.CreateUserAsync();
+        var workspace = await client.CreateWorkspaceAsync();
+        var source = await client.CreateBoardAsync(workspace.Id, "Sprint 1", "Todo", "Doing", "Done");
+        await client.PostAsJsonAsync($"/api/boards/{source.Id}/labels", new LabelRequest("Bug", "red"));
+        await client.CreateCardAsync(source.Columns[0].Id, "Left behind");
+
+        var response = await client.PostAsJsonAsync($"/api/boards/{source.Id}/copy", new CopyBoardRequest("Sprint 2", false));
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var copy = await response.ReadAsAsync<BoardDto>();
+        copy.Name.Should().Be("Sprint 2");
+        copy.Columns.Select(c => c.Name).Should().Equal("Todo", "Doing", "Done");
+        copy.Columns.Select(c => c.Id).Should().NotIntersectWith(source.Columns.Select(c => c.Id));
+        copy.Labels.Select(l => l.Name).Should().Equal("Bug");
+        (await client.GetCardsAsync(copy.Id)).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Copy_WithCards_KeepsOrderLabelsAndChecklists()
+    {
+        var (client, user) = await factory.CreateUserAsync();
+        var workspace = await client.CreateWorkspaceAsync();
+        var source = await client.CreateBoardAsync(workspace.Id, "Template", "Todo", "Done");
+        var bug = await (await client.PostAsJsonAsync($"/api/boards/{source.Id}/labels", new LabelRequest("Bug", "red"))).ReadAsAsync<LabelDto>();
+        var first = await client.CreateCardAsync(source.Columns[0].Id, "First");
+        await client.CreateCardAsync(source.Columns[0].Id, "Second");
+        await client.PutAsJsonAsync($"/api/cards/{first.Id}/labels", new SetCardLabelsRequest([bug.Id]));
+        await client.PutAsJsonAsync($"/api/cards/{first.Id}/assignees", new SetCardAssigneesRequest([user.Id]));
+        var checklist = await (await client.PostAsJsonAsync($"/api/cards/{first.Id}/checklists", new ChecklistRequest("Steps"))).ReadAsAsync<ChecklistDto>();
+        await client.PostAsJsonAsync($"/api/checklists/{checklist.Id}/items", new CreateChecklistItemRequest("Step one"));
+
+        var copy = await (await client.PostAsJsonAsync($"/api/boards/{source.Id}/copy", new CopyBoardRequest("From template", true))).ReadAsAsync<BoardDto>();
+
+        var cards = await client.GetCardsAsync(copy.Id);
+        cards.Select(c => c.Title).Should().Equal("First", "Second");
+        cards.Should().OnlyContain(c => c.ColumnId == copy.Columns[0].Id);
+        cards[0].LabelIds.Should().Equal(copy.Labels[0].Id);
+        cards[0].AssigneeIds.Should().BeEmpty();
+        cards[0].ChecklistTotal.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Copy_ByNonMember_ReturnsNotFound()
+    {
+        var (owner, _) = await factory.CreateUserAsync();
+        var (stranger, _) = await factory.CreateUserAsync();
+        var workspace = await owner.CreateWorkspaceAsync();
+        var board = await owner.CreateBoardAsync(workspace.Id);
+
+        var response = await stranger.PostAsJsonAsync($"/api/boards/{board.Id}/copy", new CopyBoardRequest("Mine now", true));
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }
