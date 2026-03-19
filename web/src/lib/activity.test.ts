@@ -42,6 +42,15 @@ describe('describeActivity', () => {
     ).toBe('renamed the column "Doing" to "In progress"');
   });
 
+  it('mentions where a copied board came from', () => {
+    expect(
+      describeActivity(entry('board.created', { board: 'Sprint 2', copiedFrom: 'Sprint 1' }, null)),
+    ).toBe('created the board as a copy of "Sprint 1"');
+    expect(describeActivity(entry('board.created', { board: 'Sprint 1' }, null))).toBe(
+      'created the board',
+    );
+  });
+
   it('includes comment excerpts', () => {
     expect(describeActivity(entry('comment.added', { excerpt: 'Looks good' }))).toBe(
       'commented on "Ship v2": “Looks good”',

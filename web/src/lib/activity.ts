@@ -9,7 +9,9 @@ export function describeActivity(activity: Activity, onCard = false): string {
   const card = onCard ? 'this card' : `"${activity.cardTitle ?? d.title ?? 'a card'}"`;
   switch (activity.type) {
     case 'board.created':
-      return `created the board`;
+      return d.copiedFrom
+        ? `created the board as a copy of "${d.copiedFrom}"`
+        : 'created the board';
     case 'column.created':
       return `added the column "${d.column}"`;
     case 'column.renamed':
