@@ -13,9 +13,16 @@ export function Modal({ label, onClose, children, wide }: ModalProps) {
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        onClose();
+      if (event.key !== 'Escape' || event.defaultPrevented) {
+        return;
       }
+      // Escape in a text field means "stop editing", not "throw my changes away".
+      const target = event.target as HTMLElement | null;
+      if (target?.closest('input, textarea, select')) {
+        target.blur();
+        return;
+      }
+      onClose();
     }
     document.addEventListener('keydown', onKey);
     dialogRef.current?.focus();
