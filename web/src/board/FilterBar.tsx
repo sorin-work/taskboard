@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CardFilters } from '../api/boards';
 import type { Board } from '../api/types';
 import { activeFilterCount, DUE_OPTIONS } from '../lib/filters';
@@ -11,6 +11,21 @@ interface FilterBarProps {
 
 export function FilterBar({ board, filters, onChange }: FilterBarProps) {
   const [q, setQ] = useState(filters.q ?? '');
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // "/" jumps to the search box, like on most sites with one.
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      const target = event.target as HTMLElement | null;
+      if (event.key !== '/' || target?.closest('input, textarea, select, [contenteditable]')) {
+        return;
+      }
+      event.preventDefault();
+      searchRef.current?.focus();
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   // Wait for a pause in typing before filtering.
   useEffect(() => {
@@ -26,9 +41,10 @@ export function FilterBar({ board, filters, onChange }: FilterBarProps) {
   return (
     <div className="filter-bar" role="search">
       <input
+        ref={searchRef}
         type="search"
         aria-label="Search cards"
-        placeholder="Search cards…"
+        placeholder="Search cards…  /"
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />

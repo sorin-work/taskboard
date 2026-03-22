@@ -47,6 +47,15 @@ describe('FilterBar', () => {
     expect(screen.getByLabelText('Search cards')).toHaveValue('');
   });
 
+  it('focuses the search box when / is pressed', async () => {
+    render(<FilterBar board={board} filters={{}} onChange={() => {}} />);
+
+    await userEvent.keyboard('/');
+
+    expect(screen.getByLabelText('Search cards')).toHaveFocus();
+    expect(screen.getByLabelText('Search cards')).toHaveValue('');
+  });
+
   it('hides the clear button without filters', () => {
     render(<FilterBar board={board} filters={{}} onChange={() => {}} />);
     expect(screen.queryByRole('button', { name: 'Clear filters' })).not.toBeInTheDocument();
