@@ -1375,3 +1375,17 @@ a.button.primary {
   border: 1px solid var(--border);
   border-radius: 6px;
 }
+
+.nav-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  min-width: 1.2rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: #f04438;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2rem;
+  text-align: center;
+}

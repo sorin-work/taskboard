@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
+import { tasksApi } from '../api/tasks';
 import { workspacesApi } from '../api/workspaces';
 import { useAuth } from '../auth/AuthContext';
 import { queryKeys } from '../lib/queryKeys';
@@ -9,6 +10,12 @@ export function Layout() {
   const navigate = useNavigate();
   const { workspaceId } = useParams();
   const workspaces = useQuery({ queryKey: queryKeys.workspaces, queryFn: workspacesApi.list });
+  const overdue = useQuery({
+    queryKey: queryKeys.myTasks({ due: 'overdue', completed: 'false' }),
+    queryFn: () => tasksApi.mine({ due: 'overdue' }),
+    refetchInterval: 5 * 60_000,
+  });
+  const overdueCount = overdue.data?.length ?? 0;
 
   return (
     <div className="app">
@@ -32,7 +39,14 @@ export function Layout() {
           </select>
         )}
         <nav className="topbar-nav">
-          <NavLink to="/my-tasks">My tasks</NavLink>
+          <NavLink to="/my-tasks">
+            My tasks
+            {overdueCount > 0 && (
+              <span className="nav-badge" title={`${overdueCount} overdue`}>
+                {overdueCount}
+              </span>
+            )}
+          </NavLink>
         </nav>
         <div className="topbar-user">
           <Link to="/settings">{user?.displayName}</Link>
