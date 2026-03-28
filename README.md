@@ -13,11 +13,17 @@ due dates. "My tasks" collects everything assigned to you in one list.
 - **Cards**: drag and drop within and between columns, with a stable order
   that survives reloads; description, assignees, labels, due date, checklists
   and comments
+- **WIP limits**: optional per column; the column turns red when it's over
+- **Copy a board**: reuse a board's columns and labels (and optionally its
+  cards) for the next sprint or month
 - **Activity**: every board and every card keeps a log of who did what
 - **Filters**: narrow a board down by assignee, label, due date or text; the
   filters live in the URL so you can share a filtered view
 - **My tasks**: cards assigned to you across all boards, grouped into overdue,
-  today, the next few days, later and no due date
+  today, the next few days, later and no due date; the top bar shows how many
+  are overdue
+- **Small touches**: dark theme that follows your system, `/` to search a
+  board, and a layout that works on a phone
 
 ## Running with Docker
 
