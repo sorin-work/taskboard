@@ -40,7 +40,7 @@ public class TaskboardApiFactory : WebApplicationFactory<Program>
             services.RemoveAll<DbContextOptions<TaskboardDbContext>>();
             services.RemoveAll<IDbContextOptionsConfiguration<TaskboardDbContext>>();
             services.AddDbContext<TaskboardDbContext>(options => options
-                .UseSqlite(_connection)
+                .UseSqlite(_connection, sqlite => sqlite.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
                 .UseSnakeCaseNamingConvention());
         });
     }
