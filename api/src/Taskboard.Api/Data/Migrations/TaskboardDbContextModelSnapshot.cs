@@ -17,7 +17,7 @@ namespace Taskboard.Api.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.11")
+                .HasAnnotation("ProductVersion", "9.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -200,11 +200,11 @@ namespace Taskboard.Api.Data.Migrations
                     b.HasKey("Id")
                         .HasName("pk_cards");
 
-                    b.HasIndex("BoardId")
-                        .HasDatabaseName("ix_cards_board_id");
-
                     b.HasIndex("CreatedById")
                         .HasDatabaseName("ix_cards_created_by_id");
+
+                    b.HasIndex("BoardId", "DueDate")
+                        .HasDatabaseName("ix_cards_board_id_due_date");
 
                     b.HasIndex("ColumnId", "Position")
                         .HasDatabaseName("ix_cards_column_id_position");

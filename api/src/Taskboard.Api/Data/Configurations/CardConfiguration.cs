@@ -15,6 +15,9 @@ public class CardConfiguration : IEntityTypeConfiguration<Card>
         builder.HasOne(c => c.Column).WithMany().HasForeignKey(c => c.ColumnId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(c => new { c.ColumnId, c.Position });
+
+        // Due date filters on a board and the my tasks list.
+        builder.HasIndex(c => new { c.BoardId, c.DueDate });
     }
 }
 
