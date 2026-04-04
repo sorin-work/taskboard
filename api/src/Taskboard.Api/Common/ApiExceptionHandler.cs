@@ -18,6 +18,18 @@ public sealed class ApiExceptionHandler(IProblemDetailsService problemDetails, I
                 Detail = apiException.Message,
             };
         }
+        else if (exception is BadHttpRequestException badRequest)
+        {
+            // Malformed json, wrong types, missing body: the client's fault, so say what's wrong.
+            problem = new ProblemDetails
+            {
+                Status = badRequest.StatusCode,
+                Title = "Bad request",
+                Detail = badRequest.InnerException is System.Text.Json.JsonException
+                    ? "The request body isn't valid JSON for this endpoint."
+                    : badRequest.Message,
+            };
+        }
         else
         {
             logger.LogError(exception, "Unhandled exception for {Method} {Path}", httpContext.Request.Method, httpContext.Request.Path);

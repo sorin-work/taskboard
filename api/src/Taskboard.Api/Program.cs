@@ -22,6 +22,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails(options =>
     options.CustomizeProblemDetails = ctx => ctx.ProblemDetails.Extensions["traceId"] = ctx.HttpContext.TraceIdentifier);
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+
+// Let bad request bodies reach ApiExceptionHandler instead of becoming a bare 400.
+builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
 builder.Services.AddTaskboardDatabase(builder.Configuration);
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
