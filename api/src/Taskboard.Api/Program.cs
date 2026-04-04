@@ -30,6 +30,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddTaskboardAuth(builder.Configuration);
 builder.Services.AddTaskboardRateLimiting(builder.Configuration);
+builder.Services.AddOpenApi();
 builder.Services.AddScoped<WorkspaceAccess>();
 builder.Services.AddScoped<ActivityLog>();
 builder.Services.AddScoped<DemoSeeder>();
@@ -51,6 +52,12 @@ if (app.Configuration.GetValue("SEED_DEMO", false))
 {
     await using var scope = app.Services.CreateAsyncScope();
     await scope.ServiceProvider.GetRequiredService<DemoSeeder>().SeedAsync();
+}
+
+if (app.Environment.IsDevelopment())
+{
+    // The api description, for tools like Bruno, Postman or an openapi client generator.
+    app.MapOpenApi();
 }
 
 app.MapHealthEndpoints();
