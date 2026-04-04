@@ -71,9 +71,17 @@ public static class AuthEndpoints
             throw new UnauthorizedException("Invalid email or password.");
         }
 
-        if (hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
+        var result = hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
+        if (result == PasswordVerificationResult.Failed)
         {
             throw new UnauthorizedException("Invalid email or password.");
+        }
+
+        // The hash was made with older settings (fewer iterations); upgrade it now we have the password.
+        if (result == PasswordVerificationResult.SuccessRehashNeeded)
+        {
+            user.PasswordHash = hasher.HashPassword(user, request.Password);
+            await db.SaveChangesAsync(ct);
         }
 
         return new AuthResponse(tokens.CreateToken(user), UserDto.From(user));

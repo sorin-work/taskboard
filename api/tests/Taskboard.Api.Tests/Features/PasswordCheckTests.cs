@@ -37,4 +37,20 @@ public class PasswordCheckTests(TaskboardApiFactory factory) : IClassFixture<Tas
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         hasher.Received(1).VerifyHashedPassword(Arg.Any<User>(), Arg.Any<string>(), "whatever-it-is");
     }
+
+    [Fact]
+    public async Task Login_WhenHashIsOutdated_StoresANewHash()
+    {
+        var (client, hasher) = ClientWithSpyHasher();
+        var email = $"rehash-{Guid.NewGuid():N}@example.com";
+        await client.PostAsJsonAsync("/api/auth/signup", new SignupRequest(email, TestClients.Password, "Old Hash"));
+        var before = factory.WithDb(db => db.Users.Single(u => u.Email == email).PasswordHash);
+        hasher.VerifyHashedPassword(Arg.Is<User>(u => u.Email == email), before, TestClients.Password)
+            .Returns(PasswordVerificationResult.SuccessRehashNeeded);
+
+        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest(email, TestClients.Password));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        factory.WithDb(db => db.Users.Single(u => u.Email == email).PasswordHash).Should().NotBe(before);
+    }
 }
