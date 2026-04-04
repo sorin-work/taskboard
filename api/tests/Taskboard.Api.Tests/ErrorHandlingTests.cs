@@ -37,4 +37,36 @@ public class ErrorHandlingTests(TaskboardApiFactory factory) : IClassFixture<Tas
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
     }
+
+    [Fact]
+    public async Task Responses_CarryARequestId_ThatMatchesTheProblemTraceId()
+    {
+        var response = await factory.CreateClient().GetAsync("/api/nothing-here");
+
+        var id = response.Headers.GetValues("X-Request-Id").Single();
+        id.Should().MatchRegex("^[0-9a-f]{32}$");
+        var problem = await response.ReadAsAsync<ProblemDetails>();
+        problem.Extensions["traceId"]!.ToString().Should().Be(id);
+    }
+
+    [Theory]
+    [InlineData("from-nginx-123", "from-nginx-123")]
+    [InlineData("has spaces and <html>", null)]
+    public async Task IncomingRequestId_IsKeptOnlyWhenSafe(string incoming, string? expected)
+    {
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.TryAddWithoutValidation("X-Request-Id", incoming);
+
+        var response = await client.GetAsync("/api/health");
+
+        var id = response.Headers.GetValues("X-Request-Id").Single();
+        if (expected is null)
+        {
+            id.Should().NotBe(incoming);
+        }
+        else
+        {
+            id.Should().Be(expected);
+        }
+    }
 }

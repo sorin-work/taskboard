@@ -40,6 +40,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 var app = builder.Build();
 
+app.UseMiddleware<RequestIdMiddleware>();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseAuthentication();
