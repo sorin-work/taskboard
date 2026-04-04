@@ -1,8 +1,14 @@
-import { QueryClient } from '@tanstack/react-query';
+import { MutationCache, QueryClient } from '@tanstack/react-query';
 import { ApiError } from './api/client';
 
 export function createQueryClient() {
-  return new QueryClient({
+  const queryClient: QueryClient = new QueryClient({
+    // Almost any change (completing, assigning, moving, deleting a card) can
+    // change what's in "my tasks" and the overdue badge, so refresh them
+    // after every successful mutation rather than remembering it everywhere.
+    mutationCache: new MutationCache({
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'tasks'] }),
+    }),
     defaultOptions: {
       queries: {
         staleTime: 15_000,
@@ -14,4 +20,5 @@ export function createQueryClient() {
       },
     },
   });
+  return queryClient;
 }
