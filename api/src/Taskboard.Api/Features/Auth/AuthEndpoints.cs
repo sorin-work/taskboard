@@ -10,6 +10,10 @@ namespace Taskboard.Api.Features.Auth;
 
 public static class AuthEndpoints
 {
+    // Checked against when the email is unknown, so a miss takes as long as a wrong password.
+    private static readonly Lazy<string> _dummyHash = new(() =>
+        new PasswordHasher<User>().HashPassword(new User { Email = "", DisplayName = "" }, Guid.NewGuid().ToString()));
+
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/auth").WithTags("Auth");
@@ -61,7 +65,13 @@ public static class AuthEndpoints
     {
         var email = EmailAddress.Normalize(request.Email);
         var user = await db.Users.SingleOrDefaultAsync(u => u.Email == email, ct);
-        if (user is null || hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
+        if (user is null)
+        {
+            hasher.VerifyHashedPassword(new User { Email = email, DisplayName = "" }, _dummyHash.Value, request.Password);
+            throw new UnauthorizedException("Invalid email or password.");
+        }
+
+        if (hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
         {
             throw new UnauthorizedException("Invalid email or password.");
         }
