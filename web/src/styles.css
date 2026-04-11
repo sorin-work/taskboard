@@ -626,8 +626,11 @@ button:disabled {
   text-align: left;
   min-height: 3.5rem;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   background: var(--surface-sunken);
-  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+  cursor: text;
 }
 
 .description-editor {

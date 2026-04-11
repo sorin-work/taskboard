@@ -7,6 +7,7 @@ import type { Board, Card } from '../api/types';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { LabelChip } from '../components/LabelChip';
 import { Modal } from '../components/Modal';
+import { RichText } from '../components/RichText';
 import { queryKeys } from '../lib/queryKeys';
 import { ActivityList } from './ActivityList';
 import { AssigneePicker, LabelPicker } from './CardPeople';
@@ -150,13 +151,19 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
               </div>
             </div>
           ) : (
-            <button
-              type="button"
+            <div
+              role="button"
+              tabIndex={0}
               className="description-preview"
               onClick={() => setEditingDescription(true)}
+              onKeyDown={(e) => e.key === 'Enter' && setEditingDescription(true)}
             >
-              {card.description || <span className="muted">Add a more detailed description…</span>}
-            </button>
+              {card.description ? (
+                <RichText text={card.description} />
+              ) : (
+                <span className="muted">Add a more detailed description…</span>
+              )}
+            </div>
           )}
         </section>
 

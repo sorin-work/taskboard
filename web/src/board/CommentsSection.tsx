@@ -6,6 +6,7 @@ import type { Card, Comment, Role } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { Avatar } from '../components/Avatar';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { RichText } from '../components/RichText';
 import { formatRelative } from '../lib/dates';
 import { queryKeys } from '../lib/queryKeys';
 
@@ -129,7 +130,9 @@ function CommentItem({
             </div>
           </form>
         ) : (
-          <p className="comment-text">{comment.body}</p>
+          <p className="comment-text">
+            <RichText text={comment.body} />
+          </p>
         )}
         {!editing && (mine || canDelete) && (
           <div className="comment-actions">
