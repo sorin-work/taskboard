@@ -5,6 +5,7 @@ import type {
   InvitationPreview,
   Member,
   Role,
+  SearchResult,
   Workspace,
 } from './types';
 
@@ -15,6 +16,8 @@ export const workspacesApi = {
   rename: (id: string, name: string) =>
     api<Workspace>(`/workspaces/${id}`, { method: 'PATCH', body: { name } }),
   remove: (id: string) => api<void>(`/workspaces/${id}`, { method: 'DELETE' }),
+  search: (id: string, q: string) =>
+    api<SearchResult[]>(`/workspaces/${id}/search?q=${encodeURIComponent(q)}`),
 
   members: (id: string) => api<Member[]>(`/workspaces/${id}/members`),
   setRole: (id: string, userId: string, role: Role) =>

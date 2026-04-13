@@ -1392,3 +1392,23 @@ a.button.primary {
   line-height: 1.2rem;
   text-align: center;
 }
+
+.search-page {
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.search-hit {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.search-hit p {
+  margin: 0;
+}
+
+mark {
+  background: var(--warning-soft);
+  color: inherit;
+  border-radius: 2px;
+}

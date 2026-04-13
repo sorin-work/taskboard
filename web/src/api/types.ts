@@ -188,3 +188,14 @@ export interface MyTask {
   columnName: string;
   labels: Label[];
 }
+
+export interface SearchResult {
+  cardId: string;
+  title: string;
+  snippet: string | null;
+  boardId: string;
+  boardName: string;
+  columnName: string;
+  dueDate: string | null;
+  completed: boolean;
+}

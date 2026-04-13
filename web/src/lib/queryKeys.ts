@@ -12,5 +12,6 @@ export const queryKeys = {
   card: (cardId: string) => ['cards', cardId] as const,
   comments: (cardId: string) => ['cards', cardId, 'comments'] as const,
   cardActivity: (cardId: string) => ['cards', cardId, 'activity'] as const,
+  search: (workspaceId: string, q: string) => ['workspaces', workspaceId, 'search', q] as const,
   myTasks: (params: Record<string, string>) => ['me', 'tasks', params] as const,
 };

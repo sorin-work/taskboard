@@ -10,6 +10,7 @@ import { LoginPage } from './pages/LoginPage';
 import { MembersPage } from './pages/MembersPage';
 import { MyTasksPage } from './pages/MyTasksPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { SearchPage } from './pages/SearchPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SignupPage } from './pages/SignupPage';
 import { WorkspacePage } from './pages/WorkspacePage';
@@ -33,6 +34,7 @@ export function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/w/:workspaceId" element={<WorkspacePage />} />
                 <Route path="/w/:workspaceId/members" element={<MembersPage />} />
+                <Route path="/w/:workspaceId/search" element={<SearchPage />} />
                 <Route path="/b/:boardId" element={<BoardPage />} />
                 <Route path="/my-tasks" element={<MyTasksPage />} />
                 <Route path="/settings" element={<SettingsPage />} />

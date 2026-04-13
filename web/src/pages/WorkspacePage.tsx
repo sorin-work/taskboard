@@ -31,7 +31,8 @@ export function WorkspacePage() {
           {workspace.data && (
             <p className="muted">
               {workspace.data.memberCount} {workspace.data.memberCount === 1 ? 'member' : 'members'}{' '}
-              · <Link to={`/w/${workspaceId}/members`}>Manage members</Link>
+              · <Link to={`/w/${workspaceId}/members`}>Manage members</Link> ·{' '}
+              <Link to={`/w/${workspaceId}/search`}>Search cards</Link>
             </p>
           )}
         </div>
