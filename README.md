@@ -19,6 +19,8 @@ due dates. "My tasks" collects everything assigned to you in one list.
 - **Activity**: every board and every card keeps a log of who did what
 - **Filters**: narrow a board down by assignee, label, due date or text; the
   filters live in the URL so you can share a filtered view
+- **Search**: find cards by title or description across every board in a
+  workspace
 - **My tasks**: cards assigned to you across all boards, grouped into overdue,
   today, the next few days, later and no due date; the top bar shows how many
   are overdue
@@ -86,6 +88,7 @@ except sign up, sign in, health and invitation previews need an
 | Comments    | `GET/POST /cards/{id}/comments`, `PATCH/DELETE /comments/{id}`                           |
 | Activity    | `GET /boards/{id}/activity?before=&limit=`, `GET /cards/{id}/activity`                   |
 | My tasks    | `GET /me/tasks?due=&includeCompleted=`                                                   |
+| Search      | `GET /workspaces/{id}/search?q=`                                                         |
 
 `GET /boards/{id}/cards` and `GET /me/tasks` take the same filters:
 `assignee` (a user id, `me` or `none`), `label` (a label id), `due`
