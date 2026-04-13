@@ -14,6 +14,7 @@ using Taskboard.Api.Features.Health;
 using Taskboard.Api.Features.Invitations;
 using Taskboard.Api.Features.Labels;
 using Taskboard.Api.Features.MyTasks;
+using Taskboard.Api.Features.Search;
 using Taskboard.Api.Features.Workspaces;
 using Taskboard.Api.Seeding;
 
@@ -74,6 +75,7 @@ app.MapChecklistEndpoints();
 app.MapCommentEndpoints();
 app.MapActivityEndpoints();
 app.MapMyTasksEndpoints();
+app.MapSearchEndpoints();
 
 await app.RunAsync();
 
