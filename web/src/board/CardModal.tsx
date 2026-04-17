@@ -72,6 +72,14 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
     },
   });
 
+  const archive = useMutation({
+    mutationFn: () => (card.archivedAt ? cardsApi.restore(card.id) : cardsApi.archive(card.id)),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(queryKeys.card(card.id), updated);
+      refreshBoard();
+    },
+  });
+
   const remove = useMutation({
     mutationFn: () => cardsApi.remove(card.id),
     onSuccess: () => {
@@ -107,6 +115,11 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
             }
           }}
         />
+        {card.archivedAt && (
+          <p className="archived-note" role="status">
+            This card is archived. Restore it to put it back on the board.
+          </p>
+        )}
         <p className="muted">
           in <strong>{card.columnName}</strong> · added by {card.createdBy.displayName}
         </p>
@@ -168,7 +181,7 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
         </section>
 
         <ChecklistSection card={card} />
-        <ErrorMessage error={update.error ?? move.error ?? remove.error} />
+        <ErrorMessage error={update.error ?? move.error ?? archive.error ?? remove.error} />
         <CommentsSection card={card} role={board.role} />
         <CardActivity cardId={card.id} />
       </div>
@@ -218,10 +231,16 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
           </select>
         </div>
 
+        <button type="button" onClick={() => archive.mutate()} disabled={archive.isPending}>
+          {card.archivedAt ? 'Restore card' : 'Archive card'}
+        </button>
         <button
           type="button"
           className="danger"
-          onClick={() => window.confirm(`Delete "${card.title}"?`) && remove.mutate()}
+          onClick={() =>
+            window.confirm(`Delete "${card.title}" for good? Archiving keeps it around instead.`) &&
+            remove.mutate()
+          }
         >
           Delete card
         </button>

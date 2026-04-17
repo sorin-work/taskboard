@@ -8,6 +8,7 @@ export const queryKeys = {
   board: (boardId: string) => ['boards', boardId] as const,
   cards: (boardId: string, filters?: Record<string, string>) =>
     ['boards', boardId, 'cards', filters ?? {}] as const,
+  archivedCards: (boardId: string) => ['boards', boardId, 'cards', 'archived'] as const,
   boardActivity: (boardId: string) => ['boards', boardId, 'activity'] as const,
   card: (cardId: string) => ['cards', cardId] as const,
   comments: (cardId: string) => ['cards', cardId, 'comments'] as const,

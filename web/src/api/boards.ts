@@ -46,6 +46,7 @@ export const boardsApi = {
 
   cards: (boardId: string, filters: CardFilters = {}) =>
     api<CardSummary[]>(`/boards/${boardId}/cards${toQuery({ ...filters })}`),
+  archivedCards: (boardId: string) => api<CardSummary[]>(`/boards/${boardId}/cards?archived=true`),
   activity: (boardId: string, before?: { createdAt: string; id: string }) =>
     api<Activity[]>(
       `/boards/${boardId}/activity${toQuery({ before: before?.createdAt, beforeId: before?.id })}`,

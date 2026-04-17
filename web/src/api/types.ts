@@ -149,6 +149,7 @@ export interface Card {
   position: number;
   dueDate: string | null;
   completedAt: string | null;
+  archivedAt: string | null;
   createdBy: CardUser;
   assignees: CardUser[];
   labels: Label[];

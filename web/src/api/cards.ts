@@ -15,6 +15,8 @@ export const cardsApi = {
   update: (cardId: string, body: CardUpdate) =>
     api<Card>(`/cards/${cardId}`, { method: 'PUT', body }),
   remove: (cardId: string) => api<void>(`/cards/${cardId}`, { method: 'DELETE' }),
+  archive: (cardId: string) => api<Card>(`/cards/${cardId}/archive`, { method: 'POST' }),
+  restore: (cardId: string) => api<Card>(`/cards/${cardId}/restore`, { method: 'POST' }),
   move: (cardId: string, columnId: string, afterCardId: string | null) =>
     api<Card>(`/cards/${cardId}/move`, { method: 'POST', body: { columnId, afterCardId } }),
   setLabels: (cardId: string, labelIds: string[]) =>

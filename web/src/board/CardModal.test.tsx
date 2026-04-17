@@ -32,6 +32,7 @@ const card: Card = {
   position: 1024,
   dueDate: null,
   completedAt: null,
+  archivedAt: null,
   createdBy: { id: 'u1', displayName: 'Dana' },
   assignees: [],
   labels: [],

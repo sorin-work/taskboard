@@ -42,6 +42,10 @@ export function describeActivity(activity: Activity, onCard = false): string {
       return `added the label "${d.label}" to ${card}`;
     case 'card.label_removed':
       return `removed the label "${d.label}" from ${card}`;
+    case 'card.archived':
+      return `archived ${card}`;
+    case 'card.restored':
+      return `restored ${card} from the archive`;
     case 'card.deleted':
       return `deleted ${card}`;
     case 'comment.added':

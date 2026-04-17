@@ -6,6 +6,7 @@ import type { CardFilters } from '../api/boards';
 import { cardsApi } from '../api/cards';
 import type { CardSummary } from '../api/types';
 import { AddColumnForm } from '../board/AddColumnForm';
+import { ArchivedCardsPanel } from '../board/ArchivedCardsPanel';
 import { BoardActivityPanel } from '../board/BoardActivityPanel';
 import { BoardColumn } from '../board/BoardColumn';
 import { BoardSettings } from '../board/BoardSettings';
@@ -31,7 +32,7 @@ export function BoardPage() {
   const queryClient = useQueryClient();
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [showLabels, setShowLabels] = useState(false);
-  const [showActivity, setShowActivity] = useState(false);
+  const [panel, setPanel] = useState<'activity' | 'archive' | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
   const board = useQuery({
@@ -130,10 +131,17 @@ export function BoardPage() {
           </button>
           <button
             type="button"
-            aria-pressed={showActivity}
-            onClick={() => setShowActivity((open) => !open)}
+            aria-pressed={panel === 'activity'}
+            onClick={() => setPanel((open) => (open === 'activity' ? null : 'activity'))}
           >
             Activity
+          </button>
+          <button
+            type="button"
+            aria-pressed={panel === 'archive'}
+            onClick={() => setPanel((open) => (open === 'archive' ? null : 'archive'))}
+          >
+            Archive
           </button>
           <button type="button" onClick={() => setShowSettings(true)}>
             Settings
@@ -167,10 +175,17 @@ export function BoardPage() {
           ))}
           <AddColumnForm boardId={boardId} />
         </div>
-        {showActivity && (
+        {panel === 'activity' && (
           <BoardActivityPanel
             boardId={boardId}
-            onClose={() => setShowActivity(false)}
+            onClose={() => setPanel(null)}
+            onOpenCard={openCard}
+          />
+        )}
+        {panel === 'archive' && (
+          <ArchivedCardsPanel
+            board={board.data}
+            onClose={() => setPanel(null)}
             onOpenCard={openCard}
           />
         )}

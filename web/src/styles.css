@@ -1412,3 +1412,40 @@ mark {
   color: inherit;
   border-radius: 2px;
 }
+
+.archived-note {
+  background: var(--warning-soft);
+  color: var(--warning);
+  border-radius: 6px;
+  padding: 0.45rem 0.6rem;
+  margin: 0.5rem 0;
+}
+
+.archived-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.archived-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.1rem 0.5rem;
+  align-items: center;
+}
+
+.archived-list li .link {
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.archived-list li .muted {
+  grid-row: 2;
+}
+
+.archived-list li button:last-child {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+}
