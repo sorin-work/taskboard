@@ -153,6 +153,10 @@ namespace Taskboard.Api.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("archived_at");
+
                     b.Property<Guid>("BoardId")
                         .HasColumnType("uuid")
                         .HasColumnName("board_id");

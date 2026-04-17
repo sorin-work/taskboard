@@ -23,6 +23,9 @@ public class Card
 
     public DateTime? CompletedAt { get; set; }
 
+    /// <summary>Archived cards are hidden from the board but kept, and can be restored.</summary>
+    public DateTime? ArchivedAt { get; set; }
+
     public Guid CreatedById { get; set; }
 
     public User CreatedBy { get; set; } = null!;

@@ -26,6 +26,8 @@ public static class CardEndpoints
         card.MapGet("/", GetAsync);
         card.MapPut("/", UpdateAsync).Validate<UpdateCardRequest>();
         card.MapDelete("/", DeleteAsync);
+        card.MapPost("/archive", ArchiveAsync);
+        card.MapPost("/restore", RestoreAsync);
         card.MapPost("/move", MoveAsync).Validate<MoveCardRequest>();
         card.MapPut("/labels", SetLabelsAsync).Validate<SetCardLabelsRequest>();
         card.MapPut("/assignees", SetAssigneesAsync).Validate<SetCardAssigneesRequest>();
@@ -179,6 +181,52 @@ public static class CardEndpoints
         return Results.NoContent();
     }
 
+    private static async Task<CardDto> ArchiveAsync(
+        Guid cardId,
+        ClaimsPrincipal principal,
+        WorkspaceAccess access,
+        TaskboardDbContext db,
+        ActivityLog activity,
+        TimeProvider clock,
+        CancellationToken ct)
+    {
+        var userId = principal.GetUserId();
+        var (card, _) = await access.RequireCardAsync(cardId, userId, ct: ct);
+        if (card.ArchivedAt is null)
+        {
+            card.ArchivedAt = clock.GetUtcNow().UtcDateTime;
+            activity.Card(card, userId, ActivityTypes.CardArchived);
+            await db.SaveChangesAsync(ct);
+        }
+
+        return await LoadCardAsync(db, cardId, ct);
+    }
+
+    /// <summary>Puts an archived card back, at the bottom of the column it was in.</summary>
+    private static async Task<CardDto> RestoreAsync(
+        Guid cardId,
+        ClaimsPrincipal principal,
+        WorkspaceAccess access,
+        TaskboardDbContext db,
+        ActivityLog activity,
+        CancellationToken ct)
+    {
+        var userId = principal.GetUserId();
+        var (card, _) = await access.RequireCardAsync(cardId, userId, ct: ct);
+        if (card.ArchivedAt is not null)
+        {
+            var last = await db.Cards
+                .Where(c => c.ColumnId == card.ColumnId && c.ArchivedAt == null)
+                .MaxAsync(c => (long?)c.Position, ct);
+            card.Position = CardPositions.Between(last, null)!.Value;
+            card.ArchivedAt = null;
+            activity.Card(card, userId, ActivityTypes.CardRestored);
+            await db.SaveChangesAsync(ct);
+        }
+
+        return await LoadCardAsync(db, cardId, ct);
+    }
+
     private static async Task<CardDto> MoveAsync(
         Guid cardId,
         MoveCardRequest request,
@@ -195,7 +243,7 @@ public static class CardEndpoints
             ?? throw new BadRequestException("The target column is not on this card's board.");
 
         var siblings = await db.Cards
-            .Where(c => c.ColumnId == column.Id && c.Id != card.Id)
+            .Where(c => c.ColumnId == column.Id && c.Id != card.Id && c.ArchivedAt == null)
             .OrderBy(c => c.Position)
             .ThenBy(c => c.CreatedAt)
             .ToListAsync(ct);
@@ -335,6 +383,7 @@ public static class CardEndpoints
                 c.Position,
                 c.DueDate,
                 c.CompletedAt,
+                c.ArchivedAt,
                 new CardUserDto(c.CreatedById, c.CreatedBy.DisplayName),
                 c.Assignees
                     .OrderBy(a => a.User.DisplayName)

@@ -8,14 +8,17 @@ namespace Taskboard.Api.Features.Cards;
 /// <c>assignee</c> = a user id, <c>me</c> or <c>none</c>;
 /// <c>label</c> = a label id;
 /// <c>due</c> = <c>overdue</c>, <c>today</c>, <c>week</c> or <c>none</c>;
-/// <c>q</c> = text in the title.
+/// <c>q</c> = text in the title;
+/// <c>archived</c> = true to list archived cards instead of the board.
 /// </summary>
-public sealed record CardFilter(string? Assignee, Guid? Label, string? Due, string? Q)
+public sealed record CardFilter(string? Assignee, Guid? Label, string? Due, string? Q, bool? Archived = null)
 {
     public static readonly IReadOnlyList<string> DueOptions = ["overdue", "today", "week", "none"];
 
     public IQueryable<Card> Apply(IQueryable<Card> cards, Guid currentUserId, DateOnly today)
     {
+        cards = Archived == true ? cards.Where(c => c.ArchivedAt != null) : cards.Where(c => c.ArchivedAt == null);
+
         switch (Assignee?.Trim().ToLowerInvariant())
         {
             case null or "":

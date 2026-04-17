@@ -51,7 +51,7 @@ public static class BoardEndpoints
                 b.WorkspaceId,
                 b.Name,
                 b.Description,
-                db.Cards.Count(c => c.BoardId == b.Id),
+                db.Cards.Count(c => c.BoardId == b.Id && c.ArchivedAt == null),
                 b.CreatedAt,
                 b.ArchivedAt))
             .ToListAsync(ct);

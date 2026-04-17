@@ -18,6 +18,8 @@ public static class ActivityTypes
     public const string CardUnassigned = "card.unassigned";
     public const string CardLabelAdded = "card.label_added";
     public const string CardLabelRemoved = "card.label_removed";
+    public const string CardArchived = "card.archived";
+    public const string CardRestored = "card.restored";
     public const string CardDeleted = "card.deleted";
     public const string CommentAdded = "comment.added";
     public const string ChecklistItemCompleted = "checklist.item_completed";

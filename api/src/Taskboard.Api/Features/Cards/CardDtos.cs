@@ -40,6 +40,7 @@ public sealed record CardDto(
     long Position,
     DateOnly? DueDate,
     DateTime? CompletedAt,
+    DateTime? ArchivedAt,
     CardUserDto CreatedBy,
     IReadOnlyList<CardUserDto> Assignees,
     IReadOnlyList<LabelDto> Labels,
