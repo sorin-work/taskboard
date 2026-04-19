@@ -27,6 +27,52 @@ due dates. "My tasks" collects everything assigned to you in one list.
 - **Small touches**: dark theme that follows your system, `/` to search a
   board, and a layout that works on a phone
 
+## Stack
+
+| Part     | Tech                                                                      |
+| -------- | ------------------------------------------------------------------------- |
+| API      | C# / .NET 9, ASP.NET Core minimal APIs, EF Core 9 + Npgsql, FluentValidation |
+| Auth     | JWT bearer tokens (HS256), ASP.NET Identity's `PasswordHasher` (PBKDF2)   |
+| Database | PostgreSQL 17, EF Core migrations                                         |
+| Web      | React 19, TypeScript, Vite, React Router, TanStack Query                  |
+| Tests    | xUnit, FluentAssertions, NSubstitute, `WebApplicationFactory` on SQLite; Vitest + Testing Library |
+| Tooling  | `dotnet format` + analyzers, ESLint, Prettier, GitHub Actions             |
+
+## Architecture
+
+```
+browser ──► nginx (web container) ──► /api/* ──► ASP.NET Core api ──► Postgres
+              └─ serves the built React app for every other path
+```
+
+**API** (`api/src/Taskboard.Api`). One folder per feature under `Features/`
+(auth, workspaces, invitations, boards, cards, labels, checklists, comments,
+activity, my tasks, search), each with its endpoints, DTOs and validators.
+Endpoints are minimal APIs grouped with `MapGroup`; requests are validated by
+a FluentValidation endpoint filter; errors are thrown as `ApiException`s and
+turned into problem details by one exception handler.
+
+Permissions go through `WorkspaceAccess`: every board, column, card, label
+and checklist lookup checks the caller's membership of the owning workspace
+and their role. Anything you aren't a member of is a 404, not a 403, so ids
+can't be probed.
+
+Changes write to the activity log in the same `SaveChanges` as the change
+itself. Entries keep the names involved (card title, column names, label) so
+the feed still makes sense after things are renamed or deleted.
+
+**Card ordering.** Each card has a numeric position, spaced 1024 apart. A
+move sends `{ columnId, afterCardId }`; the api puts the card halfway between
+that card and the next one, so normally only the moved card changes. When two
+neighbours end up with no gap left, the column is renumbered. Ties never
+happen, so the order is the same on every reload and for every user.
+
+**Web** (`web/src`). Pages in `pages/`, board UI in `board/`, shared pieces in
+`components/`, and plain functions with their tests in `lib/` (ordering,
+dates, filters, activity text). Server state lives in TanStack Query; drag and
+drop updates the cached cards immediately and rolls back if the api refuses.
+Board filters live in the URL.
+
 ## Running with Docker
 
 ```bash
