@@ -48,7 +48,7 @@ public static class SearchEndpoints
 
 #pragma warning disable CA1304, CA1311, CA1862 // runs as SQL lower(), not in .NET
         var rows = await db.Cards
-            .Where(c => c.Board.WorkspaceId == workspaceId && c.Board.ArchivedAt == null)
+            .Where(c => c.Board.WorkspaceId == workspaceId && c.Board.ArchivedAt == null && c.ArchivedAt == null)
             .Where(c => c.Title.ToLower().Contains(term) || c.Description.ToLower().Contains(term))
             .Select(c => new
             {

@@ -50,6 +50,19 @@ public class SearchTests(TaskboardApiFactory factory) : IClassFixture<TaskboardA
     }
 
     [Fact]
+    public async Task SkipsArchivedCards()
+    {
+        var (client, _) = await factory.CreateUserAsync();
+        var workspace = await client.CreateWorkspaceAsync();
+        var board = await client.CreateBoardAsync(workspace.Id);
+        var card = await client.CreateCardAsync(board.Columns[0].Id, "Budget draft");
+        await client.CreateCardAsync(board.Columns[0].Id, "Budget final");
+        await client.PostAsync($"/api/cards/{card.Id}/archive", null);
+
+        (await SearchAsync(client, workspace.Id, "budget")).Select(r => r.Title).Should().Equal("Budget final");
+    }
+
+    [Fact]
     public async Task TooShortQuery_ReturnsBadRequest()
     {
         var (client, _) = await factory.CreateUserAsync();
