@@ -25,6 +25,8 @@ public static class BoardEndpoints
         board.MapPatch("/", UpdateAsync).Validate<UpdateBoardRequest>();
         board.MapDelete("/", DeleteAsync);
         board.MapPost("/copy", CopyAsync).Validate<CopyBoardRequest>();
+        board.MapPut("/star", StarAsync);
+        board.MapDelete("/star", UnstarAsync);
 
         return app;
     }
@@ -37,15 +39,15 @@ public static class BoardEndpoints
         TaskboardDbContext db,
         CancellationToken ct)
     {
-        await access.RequireMemberAsync(workspaceId, principal.GetUserId(), ct: ct);
+        var userId = principal.GetUserId();
+        await access.RequireMemberAsync(workspaceId, userId, ct: ct);
         var query = db.Boards.Where(b => b.WorkspaceId == workspaceId);
         if (includeArchived != true)
         {
             query = query.Where(b => b.ArchivedAt == null);
         }
 
-        return await query
-            .OrderBy(b => b.Name)
+        var boards = await query
             .Select(b => new BoardSummaryDto(
                 b.Id,
                 b.WorkspaceId,
@@ -53,8 +55,12 @@ public static class BoardEndpoints
                 b.Description,
                 db.Cards.Count(c => c.BoardId == b.Id && c.ArchivedAt == null),
                 b.CreatedAt,
-                b.ArchivedAt))
+                b.ArchivedAt,
+                db.BoardStars.Any(s => s.BoardId == b.Id && s.UserId == userId)))
             .ToListAsync(ct);
+
+        // Starred first, then by name the way people read it.
+        return [.. boards.OrderByDescending(b => b.Starred).ThenBy(b => b.Name, StringComparer.CurrentCultureIgnoreCase)];
     }
 
     private static async Task<IResult> CreateAsync(
@@ -95,7 +101,39 @@ public static class BoardEndpoints
         CancellationToken ct)
     {
         var (board, member) = await access.RequireBoardAsync(boardId, principal.GetUserId(), ct: ct);
-        return await LoadBoardAsync(db, board.Id, member.Role, ct);
+        return await LoadBoardAsync(db, board.Id, member.Role, ct, member.UserId);
+    }
+
+    private static async Task<IResult> StarAsync(
+        Guid boardId,
+        ClaimsPrincipal principal,
+        WorkspaceAccess access,
+        TaskboardDbContext db,
+        TimeProvider clock,
+        CancellationToken ct)
+    {
+        var userId = principal.GetUserId();
+        await access.RequireBoardAsync(boardId, userId, ct: ct);
+        if (!await db.BoardStars.AnyAsync(s => s.BoardId == boardId && s.UserId == userId, ct))
+        {
+            db.BoardStars.Add(new BoardStar { BoardId = boardId, UserId = userId, CreatedAt = clock.GetUtcNow().UtcDateTime });
+            await db.SaveChangesAsync(ct);
+        }
+
+        return Results.NoContent();
+    }
+
+    private static async Task<IResult> UnstarAsync(
+        Guid boardId,
+        ClaimsPrincipal principal,
+        WorkspaceAccess access,
+        TaskboardDbContext db,
+        CancellationToken ct)
+    {
+        var userId = principal.GetUserId();
+        await access.RequireBoardAsync(boardId, userId, ct: ct);
+        await db.BoardStars.Where(s => s.BoardId == boardId && s.UserId == userId).ExecuteDeleteAsync(ct);
+        return Results.NoContent();
     }
 
     private static async Task<BoardDto> UpdateAsync(
@@ -220,7 +258,12 @@ public static class BoardEndpoints
         return Results.Created($"/api/boards/{copy.Id}", await LoadBoardAsync(db, copy.Id, member.Role, ct));
     }
 
-    internal static async Task<BoardDto> LoadBoardAsync(TaskboardDbContext db, Guid boardId, WorkspaceRole role, CancellationToken ct)
+    internal static async Task<BoardDto> LoadBoardAsync(
+        TaskboardDbContext db,
+        Guid boardId,
+        WorkspaceRole role,
+        CancellationToken ct,
+        Guid? userId = null)
     {
         var board = await db.Boards
             .AsNoTracking()
@@ -244,6 +287,7 @@ public static class BoardEndpoints
             role,
             board.CreatedAt,
             board.ArchivedAt,
+            userId is { } id && await db.BoardStars.AnyAsync(s => s.BoardId == board.Id && s.UserId == id, ct),
             [.. board.Columns.OrderBy(c => c.Position).Select(ColumnDto.From)],
             await LabelEndpoints.ForBoardAsync(db, board.Id, ct),
             members);

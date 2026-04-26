@@ -16,7 +16,8 @@ public sealed record BoardSummaryDto(
     string Description,
     int CardCount,
     DateTime CreatedAt,
-    DateTime? ArchivedAt);
+    DateTime? ArchivedAt,
+    bool Starred);
 
 public sealed record ColumnDto(Guid Id, string Name, int Position, int? WipLimit)
 {
@@ -34,6 +35,7 @@ public sealed record BoardDto(
     WorkspaceRole Role,
     DateTime CreatedAt,
     DateTime? ArchivedAt,
+    bool Starred,
     IReadOnlyList<ColumnDto> Columns,
     IReadOnlyList<LabelDto> Labels,
     IReadOnlyList<BoardMemberDto> Members);

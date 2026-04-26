@@ -15,6 +15,8 @@ public class TaskboardDbContext(DbContextOptions<TaskboardDbContext> options) : 
 
     public DbSet<Board> Boards => Set<Board>();
 
+    public DbSet<BoardStar> BoardStars => Set<BoardStar>();
+
     public DbSet<BoardColumn> Columns => Set<BoardColumn>();
 
     public DbSet<Card> Cards => Set<Card>();

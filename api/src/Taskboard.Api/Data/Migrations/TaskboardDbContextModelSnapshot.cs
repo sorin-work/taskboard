@@ -17,7 +17,7 @@ namespace Taskboard.Api.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.14")
+                .HasAnnotation("ProductVersion", "9.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -144,6 +144,29 @@ namespace Taskboard.Api.Data.Migrations
                         .HasDatabaseName("ix_board_columns_board_id_position");
 
                     b.ToTable("board_columns", (string)null);
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.BoardStar", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("board_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("UserId", "BoardId")
+                        .HasName("pk_board_stars");
+
+                    b.HasIndex("BoardId")
+                        .HasDatabaseName("ix_board_stars_board_id");
+
+                    b.ToTable("board_stars", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Api.Domain.Card", b =>
@@ -596,6 +619,25 @@ namespace Taskboard.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_board_columns_boards_board_id");
+
+                    b.Navigation("Board");
+                });
+
+            modelBuilder.Entity("Taskboard.Api.Domain.BoardStar", b =>
+                {
+                    b.HasOne("Taskboard.Api.Domain.Board", "Board")
+                        .WithMany()
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_board_stars_boards_board_id");
+
+                    b.HasOne("Taskboard.Api.Domain.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_board_stars_users_user_id");
 
                     b.Navigation("Board");
                 });

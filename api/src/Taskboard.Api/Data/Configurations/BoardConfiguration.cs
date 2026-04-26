@@ -27,3 +27,14 @@ public class BoardColumnConfiguration : IEntityTypeConfiguration<BoardColumn>
         builder.HasIndex(c => new { c.BoardId, c.Position });
     }
 }
+
+public class BoardStarConfiguration : IEntityTypeConfiguration<BoardStar>
+{
+    public void Configure(EntityTypeBuilder<BoardStar> builder)
+    {
+        builder.HasKey(s => new { s.UserId, s.BoardId });
+        builder.HasOne<User>().WithMany().HasForeignKey(s => s.UserId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(s => s.Board).WithMany().HasForeignKey(s => s.BoardId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(s => s.BoardId);
+    }
+}
