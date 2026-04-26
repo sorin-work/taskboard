@@ -61,6 +61,7 @@ export interface BoardSummary {
   cardCount: number;
   createdAt: string;
   archivedAt: string | null;
+  starred: boolean;
 }
 
 export interface Column {
@@ -102,6 +103,7 @@ export interface Board {
   role: Role;
   createdAt: string;
   archivedAt: string | null;
+  starred: boolean;
   columns: Column[];
   labels: Label[];
   members: BoardMember[];

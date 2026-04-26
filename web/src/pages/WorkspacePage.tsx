@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { boardsApi } from '../api/boards';
 import { workspacesApi } from '../api/workspaces';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { StarButton } from '../components/StarButton';
 import { queryKeys } from '../lib/queryKeys';
 
 export function WorkspacePage() {
@@ -51,7 +52,10 @@ export function WorkspacePage() {
         {boards.data?.map((board) => (
           <li key={board.id} className={board.archivedAt ? 'board-tile archived' : 'board-tile'}>
             <Link to={`/b/${board.id}`}>
-              <h2>{board.name}</h2>
+              <div className="board-tile-title">
+                <h2>{board.name}</h2>
+                <StarButton boardId={board.id} workspaceId={workspaceId} starred={board.starred} />
+              </div>
               {board.description && <p>{board.description}</p>}
               <span className="muted">
                 {board.cardCount} {board.cardCount === 1 ? 'card' : 'cards'}

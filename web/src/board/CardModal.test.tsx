@@ -14,6 +14,7 @@ const board: Board = {
   role: 'owner',
   createdAt: '',
   archivedAt: null,
+  starred: false,
   columns: [
     { id: 'todo', name: 'To do', position: 0, wipLimit: null },
     { id: 'done', name: 'Done', position: 1, wipLimit: null },

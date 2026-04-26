@@ -40,6 +40,8 @@ export const boardsApi = {
   get: (boardId: string) => api<Board>(`/boards/${boardId}`),
   update: (boardId: string, body: { name: string; description: string; archived: boolean }) =>
     api<Board>(`/boards/${boardId}`, { method: 'PATCH', body }),
+  star: (boardId: string, starred: boolean) =>
+    api<void>(`/boards/${boardId}/star`, { method: starred ? 'PUT' : 'DELETE' }),
   remove: (boardId: string) => api<void>(`/boards/${boardId}`, { method: 'DELETE' }),
   copy: (boardId: string, name: string, includeCards: boolean) =>
     api<Board>(`/boards/${boardId}/copy`, { method: 'POST', body: { name, includeCards } }),

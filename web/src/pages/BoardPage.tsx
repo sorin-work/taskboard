@@ -15,6 +15,7 @@ import { FilterBar } from '../board/FilterBar';
 import { LabelManager } from '../board/LabelManager';
 import { Avatar } from '../components/Avatar';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { StarButton } from '../components/StarButton';
 import { activeFilterCount, readFilters, writeFilters } from '../lib/filters';
 import { groupByColumn, isNoopMove, moveCard } from '../lib/ordering';
 import { queryKeys } from '../lib/queryKeys';
@@ -112,7 +113,12 @@ export function BoardPage() {
             {board.data.workspaceName}
           </Link>
           <h1>
-            {board.data.name}
+            {board.data.name}{' '}
+            <StarButton
+              boardId={boardId}
+              workspaceId={board.data.workspaceId}
+              starred={board.data.starred}
+            />
             {board.data.archivedAt && <span className="archived-badge">Archived</span>}
           </h1>
           {board.data.description && <p className="muted">{board.data.description}</p>}
