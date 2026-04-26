@@ -192,4 +192,37 @@ public class BoardTests(TaskboardApiFactory factory) : IClassFixture<TaskboardAp
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
+
+    [Fact]
+    public async Task Star_PutsBoardFirstForThatUserOnly()
+    {
+        var (alice, _) = await factory.CreateUserAsync();
+        var (bob, bobUser) = await factory.CreateUserAsync();
+        var workspace = await alice.CreateWorkspaceAsync();
+        factory.AddMember(workspace.Id, bobUser.Id);
+        await alice.CreateBoardAsync(workspace.Id, "Alpha");
+        var zulu = await alice.CreateBoardAsync(workspace.Id, "Zulu");
+
+        (await alice.PutAsync($"/api/boards/{zulu.Id}/star", null)).StatusCode.Should().Be(HttpStatusCode.NoContent);
+        await alice.PutAsync($"/api/boards/{zulu.Id}/star", null);
+
+        var forAlice = await alice.GetFromJsonAsync<List<BoardSummaryDto>>($"/api/workspaces/{workspace.Id}/boards", TestJson.Options);
+        var forBob = await bob.GetFromJsonAsync<List<BoardSummaryDto>>($"/api/workspaces/{workspace.Id}/boards", TestJson.Options);
+        forAlice!.Select(b => (b.Name, b.Starred)).Should().Equal(("Zulu", true), ("Alpha", false));
+        forBob!.Select(b => b.Name).Should().Equal("Alpha", "Zulu");
+        (await alice.GetFromJsonAsync<BoardDto>($"/api/boards/{zulu.Id}", TestJson.Options))!.Starred.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Unstar_RemovesTheStar()
+    {
+        var (client, _) = await factory.CreateUserAsync();
+        var workspace = await client.CreateWorkspaceAsync();
+        var board = await client.CreateBoardAsync(workspace.Id);
+        await client.PutAsync($"/api/boards/{board.Id}/star", null);
+
+        await client.DeleteAsync($"/api/boards/{board.Id}/star");
+
+        (await client.GetFromJsonAsync<BoardDto>($"/api/boards/{board.Id}", TestJson.Options))!.Starred.Should().BeFalse();
+    }
 }
