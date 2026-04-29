@@ -50,6 +50,14 @@ public class ExportTests(TaskboardApiFactory factory) : IClassFixture<TaskboardA
         CsvWriter.Escape(value).Should().Be(expected);
 
     [Theory]
+    [InlineData("=HYPERLINK(\"http://evil\")", "\"'=HYPERLINK(\"\"http://evil\"\")\"")]
+    [InlineData("+1 for this", "'+1 for this")]
+    [InlineData("-5 points", "'-5 points")]
+    [InlineData("@channel", "'@channel")]
+    public void Escape_DefusesSpreadsheetFormulas(string value, string expected) =>
+        CsvWriter.Escape(value).Should().Be(expected);
+
+    [Theory]
     [InlineData("Team Board", "team-board")]
     [InlineData("  ***  ", "board")]
     public void Slug_MakesSafeFileNames(string name, string expected) =>

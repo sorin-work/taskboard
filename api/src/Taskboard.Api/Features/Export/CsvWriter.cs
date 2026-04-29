@@ -2,7 +2,10 @@ using System.Text;
 
 namespace Taskboard.Api.Features.Export;
 
-/// <summary>Minimal RFC 4180 writer: quotes fields that need it and doubles quotes.</summary>
+/// <summary>
+/// Minimal RFC 4180 writer: quotes fields that need it and doubles quotes.
+/// Cells that a spreadsheet would run as a formula get a leading apostrophe.
+/// </summary>
 public sealed class CsvWriter
 {
     private readonly StringBuilder _builder = new();
@@ -25,8 +28,15 @@ public sealed class CsvWriter
 
     public override string ToString() => _builder.ToString();
 
+    private static readonly char[] _formulaStarts = ['=', '+', '-', '@', '\t', '\r'];
+
     internal static string Escape(string value)
     {
+        if (value.Length > 0 && _formulaStarts.Contains(value[0]))
+        {
+            value = "'" + value;
+        }
+
         var needsQuotes = value.AsSpan().IndexOfAny(",\"\r\n") >= 0;
         return needsQuotes ? $"\"{value.Replace("\"", "\"\"", StringComparison.Ordinal)}\"" : value;
     }
