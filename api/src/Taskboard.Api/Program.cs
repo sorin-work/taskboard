@@ -10,6 +10,7 @@ using Taskboard.Api.Features.Boards;
 using Taskboard.Api.Features.Cards;
 using Taskboard.Api.Features.Checklists;
 using Taskboard.Api.Features.Comments;
+using Taskboard.Api.Features.Export;
 using Taskboard.Api.Features.Health;
 using Taskboard.Api.Features.Invitations;
 using Taskboard.Api.Features.Labels;
@@ -76,6 +77,7 @@ app.MapCommentEndpoints();
 app.MapActivityEndpoints();
 app.MapMyTasksEndpoints();
 app.MapSearchEndpoints();
+app.MapExportEndpoints();
 
 await app.RunAsync();
 
