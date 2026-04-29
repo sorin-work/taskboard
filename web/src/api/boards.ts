@@ -1,4 +1,4 @@
-import { api } from './client';
+import { api, download } from './client';
 import type {
   Activity,
   Board,
@@ -42,6 +42,7 @@ export const boardsApi = {
     api<Board>(`/boards/${boardId}`, { method: 'PATCH', body }),
   star: (boardId: string, starred: boolean) =>
     api<void>(`/boards/${boardId}/star`, { method: starred ? 'PUT' : 'DELETE' }),
+  exportCsv: (boardId: string) => download(`/boards/${boardId}/export.csv`, 'board.csv'),
   remove: (boardId: string) => api<void>(`/boards/${boardId}`, { method: 'DELETE' }),
   copy: (boardId: string, name: string, includeCards: boolean) =>
     api<Board>(`/boards/${boardId}/copy`, { method: 'POST', body: { name, includeCards } }),

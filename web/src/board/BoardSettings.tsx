@@ -77,6 +77,7 @@ export function BoardSettings({ board, onClose }: { board: Board; onClose: () =>
       </form>
 
       <CopyBoard board={board} />
+      <ExportBoard board={board} />
 
       {canAdminister && (
         <section className="danger-zone">
@@ -151,5 +152,23 @@ function CopyBoard({ board }: { board: Board }) {
       </label>
       <ErrorMessage error={copy.error} />
     </form>
+  );
+}
+
+function ExportBoard({ board }: { board: Board }) {
+  const exportCsv = useMutation({ mutationFn: () => boardsApi.exportCsv(board.id) });
+  return (
+    <section className="copy-board">
+      <h3>Export</h3>
+      <p className="muted small">
+        Every card as a CSV file, for spreadsheets or reports. Archived cards are included.
+      </p>
+      <div className="row">
+        <button type="button" onClick={() => exportCsv.mutate()} disabled={exportCsv.isPending}>
+          {exportCsv.isPending ? 'Preparing…' : 'Download CSV'}
+        </button>
+      </div>
+      <ErrorMessage error={exportCsv.error} />
+    </section>
   );
 }

@@ -78,6 +78,28 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   return (await response.json()) as T;
 }
 
+/**
+ * Downloads a file from the api with the user's token and hands it to the
+ * browser as a download. A plain link can't send the Authorization header.
+ */
+export async function download(path: string, fallbackName: string): Promise<void> {
+  const token = tokenStore.get();
+  const response = await fetch(`/api${path}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!response.ok) {
+    throw await toApiError(response);
+  }
+  const disposition = response.headers.get('Content-Disposition') ?? '';
+  const name = /filename="?([^";]+)"?/.exec(disposition)?.[1] ?? fallbackName;
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 async function toApiError(response: Response): Promise<ApiError> {
   try {
     const problem = (await response.json()) as {

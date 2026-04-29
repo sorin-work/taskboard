@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { api, ApiError, setUnauthorizedHandler, tokenStore } from './client';
+import { api, ApiError, download, setUnauthorizedHandler, tokenStore } from './client';
 
 function mockFetch(status: number, body?: unknown) {
   const fetchMock = vi.fn().mockResolvedValue(
@@ -77,5 +77,26 @@ describe('api', () => {
 
     expect(error.status).toBe(0);
     expect(error.message).toMatch(/could not reach the server/i);
+  });
+
+  it('downloads files with the token and the server file name', async () => {
+    tokenStore.set('abc');
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response('a,b\r\n', {
+        status: 200,
+        headers: { 'Content-Disposition': 'attachment; filename="plan-2026-04-29.csv"' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    URL.createObjectURL = vi.fn(() => 'blob:x');
+    URL.revokeObjectURL = vi.fn();
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+    await download('/boards/b1/export.csv', 'board.csv');
+
+    expect(fetchMock.mock.calls[0]![1].headers.Authorization).toBe('Bearer abc');
+    const anchor = click.mock.instances[0] as unknown as HTMLAnchorElement;
+    expect(anchor.download).toBe('plan-2026-04-29.csv');
+    click.mockRestore();
   });
 });
