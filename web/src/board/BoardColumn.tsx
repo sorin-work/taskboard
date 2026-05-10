@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import type { DragEvent } from 'react';
 import type { BoardMember, CardSummary, Column, Label } from '../api/types';
+import type { Direction } from '../lib/keyboardMove';
 import { afterCardFor, dropIndex } from '../lib/ordering';
 import { AddCardForm } from './AddCardForm';
 import { CardTile } from './CardTile';
@@ -18,6 +19,7 @@ interface BoardColumnProps {
   onDragStart: (cardId: string) => void;
   onDragEnd: () => void;
   onDropCard: (cardId: string, columnId: string, afterCardId: string | null) => void;
+  onKeyboardMove: (cardId: string, direction: Direction) => void;
 }
 
 export function BoardColumn({
@@ -32,6 +34,7 @@ export function BoardColumn({
   onDragStart,
   onDragEnd,
   onDropCard,
+  onKeyboardMove,
 }: BoardColumnProps) {
   const listRef = useRef<HTMLOListElement>(null);
   const [dropAt, setDropAt] = useState<number | null>(null);
@@ -100,6 +103,7 @@ export function BoardColumn({
               onOpen={onOpenCard}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
+              onKeyboardMove={onKeyboardMove}
             />
           </li>
         ))}

@@ -17,6 +17,8 @@ import { Avatar } from '../components/Avatar';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { StarButton } from '../components/StarButton';
 import { activeFilterCount, readFilters, writeFilters } from '../lib/filters';
+import { keyboardMoveTarget } from '../lib/keyboardMove';
+import type { Direction } from '../lib/keyboardMove';
 import { groupByColumn, isNoopMove, moveCard } from '../lib/ordering';
 import { queryKeys } from '../lib/queryKeys';
 
@@ -105,6 +107,26 @@ export function BoardPage() {
     move.mutate({ cardId, columnId, afterCardId });
   }
 
+  function keyboardMove(cardId: string, direction: Direction) {
+    const card = cards.data?.find((c) => c.id === cardId);
+    if (!card || !board.data) {
+      return;
+    }
+    const target = keyboardMoveTarget(
+      card,
+      byColumn.get(card.columnId) ?? [],
+      board.data.columns,
+      direction,
+    );
+    if (target) {
+      move.mutate({ cardId, ...target });
+      // Keep focus on the card so it can be moved again straight away.
+      requestAnimationFrame(() =>
+        document.querySelector<HTMLElement>(`[data-tile-id="${cardId}"]`)?.focus(),
+      );
+    }
+  }
+
   return (
     <section className="board-page">
       <header className="board-header">
@@ -177,6 +199,7 @@ export function BoardPage() {
               onDragStart={setDraggingId}
               onDragEnd={() => setDraggingId(null)}
               onDropCard={dropCard}
+              onKeyboardMove={keyboardMove}
             />
           ))}
           <AddColumnForm boardId={boardId} />
