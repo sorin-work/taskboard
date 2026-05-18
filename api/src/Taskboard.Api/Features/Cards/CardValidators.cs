@@ -16,6 +16,12 @@ public sealed class UpdateCardRequestValidator : AbstractValidator<UpdateCardReq
     {
         RuleFor(r => r.Title).NotEmpty().MaximumLength(200);
         RuleFor(r => r.Description).MaximumLength(10000);
+
+        // A typo in the year (0202, 20266) otherwise sorts to the top of my tasks forever.
+        RuleFor(r => r.DueDate)
+            .InclusiveBetween(new DateOnly(2000, 1, 1), new DateOnly(2100, 12, 31))
+            .When(r => r.DueDate is not null)
+            .WithMessage("Due date must be between the years 2000 and 2100.");
     }
 }
 

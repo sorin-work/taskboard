@@ -217,4 +217,18 @@ public class CardTests(TaskboardApiFactory factory) : IClassFixture<TaskboardApi
         reopened.CompletedAt.Should().BeNull();
         (await client.GetCardsAsync(board.Id)).Single().Completed.Should().BeFalse();
     }
+
+    [Theory]
+    [InlineData(202, 3, 1)]
+    [InlineData(2202, 3, 1)]
+    public async Task Update_WithAbsurdDueDate_ReturnsBadRequest(int year, int month, int day)
+    {
+        var (client, board) = await BoardAsync();
+        var card = await client.CreateCardAsync(board.Columns[0].Id);
+
+        var response = await client.PutAsJsonAsync($"/api/cards/{card.Id}",
+            new UpdateCardRequest(card.Title, null, new DateOnly(year, month, day)));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
 }
