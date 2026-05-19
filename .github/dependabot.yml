@@ -1,0 +1,30 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /api
+    schedule:
+      interval: monthly
+    groups:
+      microsoft:
+        patterns: ['Microsoft.*']
+    ignore:
+      # Stay on .NET 9 until the upgrade is done on purpose.
+      - dependency-name: 'Microsoft.*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'Npgsql.*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'EFCore.NamingConventions'
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: monthly
+    groups:
+      dev-tools:
+        dependency-type: development
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
