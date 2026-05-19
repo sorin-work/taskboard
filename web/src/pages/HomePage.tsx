@@ -4,9 +4,10 @@ import { Navigate, useNavigate } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { workspacesApi } from '../api/workspaces';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { lastWorkspace } from '../lib/lastWorkspace';
 import { queryKeys } from '../lib/queryKeys';
 
-/** Sends people to their first workspace, or helps them create one. */
+/** Sends people to the workspace they used last (or their first), or helps them create one. */
 export function HomePage() {
   const workspaces = useQuery({ queryKey: queryKeys.workspaces, queryFn: workspacesApi.list });
 
@@ -16,9 +17,10 @@ export function HomePage() {
   if (workspaces.isError) {
     return <ErrorMessage error={workspaces.error} />;
   }
-  const first = workspaces.data[0];
-  if (first) {
-    return <Navigate to={`/w/${first.id}`} replace />;
+  const remembered = workspaces.data.find((w) => w.id === lastWorkspace.get());
+  const target = remembered ?? workspaces.data[0];
+  if (target) {
+    return <Navigate to={`/w/${target.id}`} replace />;
   }
   return (
     <section className="empty-state">

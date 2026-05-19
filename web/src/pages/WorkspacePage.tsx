@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -6,6 +6,7 @@ import { boardsApi } from '../api/boards';
 import { workspacesApi } from '../api/workspaces';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { StarButton } from '../components/StarButton';
+import { lastWorkspace } from '../lib/lastWorkspace';
 import { queryKeys } from '../lib/queryKeys';
 
 export function WorkspacePage() {
@@ -19,6 +20,12 @@ export function WorkspacePage() {
     queryKey: queryKeys.boards(workspaceId, showArchived),
     queryFn: () => boardsApi.list(workspaceId, showArchived),
   });
+
+  useEffect(() => {
+    if (workspace.data) {
+      lastWorkspace.set(workspace.data.id);
+    }
+  }, [workspace.data]);
 
   if (workspace.isError) {
     return <ErrorMessage error={workspace.error} />;
