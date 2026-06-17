@@ -28,9 +28,12 @@ function toQuery(params: Record<string, string | undefined>) {
 }
 
 export const boardsApi = {
-  list: (workspaceId: string, includeArchived = false) =>
+  list: (workspaceId: string, includeArchived = false, today?: string) =>
     api<BoardSummary[]>(
-      `/workspaces/${workspaceId}/boards${includeArchived ? '?includeArchived=true' : ''}`,
+      `/workspaces/${workspaceId}/boards${toQuery({
+        includeArchived: includeArchived ? 'true' : undefined,
+        today,
+      })}`,
     ),
   create: (workspaceId: string, name: string, description?: string) =>
     api<Board>(`/workspaces/${workspaceId}/boards`, {

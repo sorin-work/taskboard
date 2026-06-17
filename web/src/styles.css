@@ -331,6 +331,11 @@ button:disabled {
   font-size: 0.9rem;
 }
 
+.board-tile .due-badge {
+  margin-left: 0.5rem;
+  font-size: 0.78rem;
+}
+
 .board-tile.archived {
   opacity: 0.65;
 }

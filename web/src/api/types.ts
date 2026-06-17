@@ -59,6 +59,7 @@ export interface BoardSummary {
   name: string;
   description: string;
   cardCount: number;
+  overdueCount: number;
   createdAt: string;
   archivedAt: string | null;
   starred: boolean;

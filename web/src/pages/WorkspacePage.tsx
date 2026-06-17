@@ -6,6 +6,7 @@ import { boardsApi } from '../api/boards';
 import { workspacesApi } from '../api/workspaces';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { StarButton } from '../components/StarButton';
+import { todayIso } from '../lib/dates';
 import { lastWorkspace } from '../lib/lastWorkspace';
 import { queryKeys } from '../lib/queryKeys';
 
@@ -18,7 +19,7 @@ export function WorkspacePage() {
   });
   const boards = useQuery({
     queryKey: queryKeys.boards(workspaceId, showArchived),
-    queryFn: () => boardsApi.list(workspaceId, showArchived),
+    queryFn: () => boardsApi.list(workspaceId, showArchived, todayIso()),
   });
 
   useEffect(() => {
@@ -68,6 +69,9 @@ export function WorkspacePage() {
                 {board.cardCount} {board.cardCount === 1 ? 'card' : 'cards'}
                 {board.archivedAt && ' · archived'}
               </span>
+              {board.overdueCount > 0 && (
+                <span className="due-badge due-overdue">{board.overdueCount} overdue</span>
+              )}
             </Link>
           </li>
         ))}
