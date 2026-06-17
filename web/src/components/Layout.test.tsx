@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { tokenStore } from '../api/client';
 import { mockApi, renderWithProviders } from '../test/utils';
@@ -46,5 +46,25 @@ describe('Layout', () => {
       'Studio',
     ]);
     expect(screen.queryByTitle(/overdue/)).not.toBeInTheDocument();
+  });
+
+  it("selects the board's workspace on a board page", async () => {
+    tokenStore.set('t');
+    mockApi({
+      'GET /api/auth/me': () => ({ body: me }),
+      'GET /api/workspaces': () => ({
+        body: [
+          { id: 'w1', name: 'Home', role: 'owner', memberCount: 1, createdAt: '' },
+          { id: 'w2', name: 'Studio', role: 'admin', memberCount: 4, createdAt: '' },
+        ],
+      }),
+      'GET /api/me/tasks': () => ({ body: [] }),
+      'GET /api/boards/b1': () => ({ body: { id: 'b1', workspaceId: 'w2', name: 'Website' } }),
+    });
+    renderWithProviders(<Layout />, { route: '/b/b1', path: '/b/:boardId' });
+
+    const switcher = (await screen.findByLabelText('Workspace')) as HTMLSelectElement;
+    await waitFor(() => expect(switcher.value).toBe('w2'));
+    expect(screen.queryByText('Choose a workspace…')).not.toBeInTheDocument();
   });
 });

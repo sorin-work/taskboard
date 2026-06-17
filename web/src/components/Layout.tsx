@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
+import { boardsApi } from '../api/boards';
 import { tasksApi } from '../api/tasks';
 import { workspacesApi } from '../api/workspaces';
 import { useAuth } from '../auth/AuthContext';
@@ -8,7 +9,14 @@ import { queryKeys } from '../lib/queryKeys';
 export function Layout() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { workspaceId } = useParams();
+  const params = useParams();
+  // Board pages only have the board id; the board (already loaded by the page) knows its workspace.
+  const board = useQuery({
+    queryKey: queryKeys.board(params.boardId ?? ''),
+    queryFn: () => boardsApi.get(params.boardId!),
+    enabled: Boolean(params.boardId),
+  });
+  const workspaceId = params.workspaceId ?? board.data?.workspaceId;
   const workspaces = useQuery({ queryKey: queryKeys.workspaces, queryFn: workspacesApi.list });
   const overdue = useQuery({
     queryKey: queryKeys.myTasks({ due: 'overdue', completed: 'false' }),
