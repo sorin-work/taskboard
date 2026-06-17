@@ -225,4 +225,29 @@ public class BoardTests(TaskboardApiFactory factory) : IClassFixture<TaskboardAp
 
         (await client.GetFromJsonAsync<BoardDto>($"/api/boards/{board.Id}", TestJson.Options))!.Starred.Should().BeFalse();
     }
+
+    [Fact]
+    public async Task List_CountsOverdueOpenCards()
+    {
+        var (client, _) = await factory.CreateUserAsync();
+        var workspace = await client.CreateWorkspaceAsync();
+        var board = await client.CreateBoardAsync(workspace.Id);
+        var today = new DateOnly(2026, 6, 19);
+        async Task CardAsync(string title, DateOnly? due, bool completed = false)
+        {
+            var card = await client.CreateCardAsync(board.Columns[0].Id, title);
+            await client.PutAsJsonAsync($"/api/cards/{card.Id}", new UpdateCardRequest(title, null, due, completed));
+        }
+
+        await CardAsync("late", today.AddDays(-1));
+        await CardAsync("late but done", today.AddDays(-3), completed: true);
+        await CardAsync("due today", today);
+        await CardAsync("no date", null);
+
+        var boards = await client.GetFromJsonAsync<List<BoardSummaryDto>>(
+            $"/api/workspaces/{workspace.Id}/boards?today=2026-06-19", TestJson.Options);
+
+        boards!.Single().CardCount.Should().Be(4);
+        boards!.Single().OverdueCount.Should().Be(1);
+    }
 }

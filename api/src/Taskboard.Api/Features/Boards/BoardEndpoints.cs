@@ -34,11 +34,15 @@ public static class BoardEndpoints
     private static async Task<List<BoardSummaryDto>> ListAsync(
         Guid workspaceId,
         bool? includeArchived,
+        DateOnly? today,
         ClaimsPrincipal principal,
         WorkspaceAccess access,
         TaskboardDbContext db,
+        TimeProvider clock,
         CancellationToken ct)
     {
+        // The browser sends its own date so "overdue" matches what people see on the board.
+        var day = today ?? DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
         var userId = principal.GetUserId();
         await access.RequireMemberAsync(workspaceId, userId, ct: ct);
         var query = db.Boards.Where(b => b.WorkspaceId == workspaceId);
@@ -54,6 +58,7 @@ public static class BoardEndpoints
                 b.Name,
                 b.Description,
                 db.Cards.Count(c => c.BoardId == b.Id && c.ArchivedAt == null),
+                db.Cards.Count(c => c.BoardId == b.Id && c.ArchivedAt == null && c.CompletedAt == null && c.DueDate < day),
                 b.CreatedAt,
                 b.ArchivedAt,
                 db.BoardStars.Any(s => s.BoardId == b.Id && s.UserId == userId)))

@@ -15,6 +15,7 @@ public sealed record BoardSummaryDto(
     string Name,
     string Description,
     int CardCount,
+    int OverdueCount,
     DateTime CreatedAt,
     DateTime? ArchivedAt,
     bool Starred);
