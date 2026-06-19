@@ -789,6 +789,13 @@ button:disabled {
   flex-basis: 100%;
 }
 
+.card-title,
+.board-tile h2,
+.task-title,
+.checklist-items label {
+  overflow-wrap: anywhere;
+}
+
 .card-tile.completed .card-title {
   color: var(--muted);
   text-decoration: line-through;
