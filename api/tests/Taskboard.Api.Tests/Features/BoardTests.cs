@@ -214,6 +214,19 @@ public class BoardTests(TaskboardApiFactory factory) : IClassFixture<TaskboardAp
     }
 
     [Fact]
+    public async Task Rename_KeepsReportingTheStar()
+    {
+        var (client, _) = await factory.CreateUserAsync();
+        var workspace = await client.CreateWorkspaceAsync();
+        var board = await client.CreateBoardAsync(workspace.Id, "Old name");
+        await client.PutAsync($"/api/boards/{board.Id}/star", null);
+
+        var response = await client.PatchAsJsonAsync($"/api/boards/{board.Id}", new UpdateBoardRequest("New name", null, false));
+
+        (await response.ReadAsAsync<BoardDto>()).Starred.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task Unstar_RemovesTheStar()
     {
         var (client, _) = await factory.CreateUserAsync();

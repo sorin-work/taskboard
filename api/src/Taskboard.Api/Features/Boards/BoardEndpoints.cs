@@ -95,7 +95,7 @@ public static class BoardEndpoints
         activity.Board(board.Id, userId, ActivityTypes.BoardCreated, new() { ["board"] = board.Name });
         await db.SaveChangesAsync(ct);
 
-        return Results.Created($"/api/boards/{board.Id}", await LoadBoardAsync(db, board.Id, member.Role, ct));
+        return Results.Created($"/api/boards/{board.Id}", await LoadBoardAsync(db, board.Id, member, ct));
     }
 
     private static async Task<BoardDto> GetAsync(
@@ -106,7 +106,7 @@ public static class BoardEndpoints
         CancellationToken ct)
     {
         var (board, member) = await access.RequireBoardAsync(boardId, principal.GetUserId(), ct: ct);
-        return await LoadBoardAsync(db, board.Id, member.Role, ct, member.UserId);
+        return await LoadBoardAsync(db, board.Id, member, ct);
     }
 
     private static async Task<IResult> StarAsync(
@@ -161,7 +161,7 @@ public static class BoardEndpoints
         board.Description = request.Description?.Trim() ?? string.Empty;
         await db.SaveChangesAsync(ct);
 
-        return await LoadBoardAsync(db, board.Id, member.Role, ct);
+        return await LoadBoardAsync(db, board.Id, member, ct);
     }
 
     private static async Task<IResult> DeleteAsync(
@@ -260,15 +260,11 @@ public static class BoardEndpoints
         activity.Board(copy.Id, userId, ActivityTypes.BoardCreated, new() { ["board"] = copy.Name, ["copiedFrom"] = source.Name });
         await db.SaveChangesAsync(ct);
 
-        return Results.Created($"/api/boards/{copy.Id}", await LoadBoardAsync(db, copy.Id, member.Role, ct));
+        return Results.Created($"/api/boards/{copy.Id}", await LoadBoardAsync(db, copy.Id, member, ct));
     }
 
-    internal static async Task<BoardDto> LoadBoardAsync(
-        TaskboardDbContext db,
-        Guid boardId,
-        WorkspaceRole role,
-        CancellationToken ct,
-        Guid? userId = null)
+    /// <summary>The board as <paramref name="member"/> sees it (their role, whether they starred it).</summary>
+    internal static async Task<BoardDto> LoadBoardAsync(TaskboardDbContext db, Guid boardId, WorkspaceMember member, CancellationToken ct)
     {
         var board = await db.Boards
             .AsNoTracking()
@@ -289,10 +285,10 @@ public static class BoardEndpoints
             board.Workspace.Name,
             board.Name,
             board.Description,
-            role,
+            member.Role,
             board.CreatedAt,
             board.ArchivedAt,
-            userId is { } id && await db.BoardStars.AnyAsync(s => s.BoardId == board.Id && s.UserId == id, ct),
+            await db.BoardStars.AnyAsync(s => s.BoardId == board.Id && s.UserId == member.UserId, ct),
             [.. board.Columns.OrderBy(c => c.Position).Select(ColumnDto.From)],
             await LabelEndpoints.ForBoardAsync(db, board.Id, ct),
             members);
