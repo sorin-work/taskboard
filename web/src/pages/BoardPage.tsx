@@ -1,10 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { boardsApi } from '../api/boards';
-import type { CardFilters } from '../api/boards';
-import { cardsApi } from '../api/cards';
-import type { CardSummary } from '../api/types';
 import { AddColumnForm } from '../board/AddColumnForm';
 import { ArchivedCardsPanel } from '../board/ArchivedCardsPanel';
 import { BoardActivityPanel } from '../board/BoardActivityPanel';
@@ -13,49 +8,26 @@ import { BoardSettings } from '../board/BoardSettings';
 import { CardModal } from '../board/CardModal';
 import { FilterBar } from '../board/FilterBar';
 import { LabelManager } from '../board/LabelManager';
+import { useBoardData } from '../board/useBoardData';
 import { Avatar } from '../components/Avatar';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { StarButton } from '../components/StarButton';
-import { activeFilterCount, readFilters, writeFilters } from '../lib/filters';
+import { activeFilterCount } from '../lib/filters';
 import { keyboardMoveTarget } from '../lib/keyboardMove';
 import type { Direction } from '../lib/keyboardMove';
-import { groupByColumn, isNoopMove, moveCard } from '../lib/ordering';
-import { queryKeys } from '../lib/queryKeys';
-
-interface MoveArgs {
-  cardId: string;
-  columnId: string;
-  afterCardId: string | null;
-}
+import { groupByColumn, isNoopMove } from '../lib/ordering';
 
 export function BoardPage() {
   const { boardId = '' } = useParams();
   const [params, setParams] = useSearchParams();
   const openCardId = params.get('card');
-  const queryClient = useQueryClient();
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [showLabels, setShowLabels] = useState(false);
   const [panel, setPanel] = useState<'activity' | 'archive' | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
-  const board = useQuery({
-    queryKey: queryKeys.board(boardId),
-    queryFn: () => boardsApi.get(boardId),
-  });
-  // Only the filter params matter here; opening a card shouldn't refetch.
-  const filterKey = writeFilters(new URLSearchParams(), readFilters(params)).toString();
-  const filters = useMemo(() => readFilters(new URLSearchParams(filterKey)), [filterKey]);
-  const cardsKey = queryKeys.cards(boardId, { ...filters });
-  const cards = useQuery({
-    queryKey: cardsKey,
-    queryFn: () => boardsApi.cards(boardId, filters),
-    placeholderData: (previous) => previous,
-  });
+  const { board, cards, filters, setFilters, move } = useBoardData(boardId);
 
-  const setFilters = useCallback(
-    (next: CardFilters) => setParams((current) => writeFilters(current, next), { replace: true }),
-    [setParams],
-  );
   const openCard = (cardId: string | null) =>
     setParams((current) => {
       const next = new URLSearchParams(current);
@@ -66,28 +38,6 @@ export function BoardPage() {
       }
       return next;
     });
-
-  const move = useMutation({
-    mutationFn: ({ cardId, columnId, afterCardId }: MoveArgs) =>
-      cardsApi.move(cardId, columnId, afterCardId),
-    onMutate: async ({ cardId, columnId, afterCardId }) => {
-      await queryClient.cancelQueries({ queryKey: cardsKey });
-      const previous = queryClient.getQueryData<CardSummary[]>(cardsKey);
-      if (previous) {
-        queryClient.setQueryData(cardsKey, moveCard(previous, cardId, columnId, afterCardId));
-      }
-      return { previous };
-    },
-    onError: (_error, _args, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(cardsKey, context.previous);
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'cards'] });
-      queryClient.invalidateQueries({ queryKey: queryKeys.boardActivity(boardId) });
-    },
-  });
 
   if (board.isPending) {
     return <div className="page-loading">Loading board…</div>;
