@@ -114,4 +114,25 @@ public class ChecklistTests(TaskboardApiFactory factory) : IClassFixture<Taskboa
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+
+    [Theory]
+    [InlineData(2, 0, new[] { "c", "a", "b" })]
+    [InlineData(0, 2, new[] { "b", "c", "a" })]
+    [InlineData(0, 50, new[] { "b", "c", "a" })]
+    public async Task MoveItem_Reorders(int from, int to, string[] expected)
+    {
+        var (client, _, card) = await CardAsync();
+        var checklist = await CreateChecklistAsync(client, card.Id);
+        var items = new List<ChecklistItemDto>();
+        foreach (var text in new[] { "a", "b", "c" })
+        {
+            items.Add(await AddItemAsync(client, checklist.Id, text));
+        }
+
+        var response = await client.PostAsJsonAsync($"/api/checklist-items/{items[from].Id}/move", new MoveChecklistItemRequest(to));
+
+        var moved = await response.ReadAsAsync<ChecklistDto>();
+        moved.Items.Select(i => i.Text).Should().Equal(expected);
+        moved.Items.Select(i => i.Position).Should().Equal(0, 1, 2);
+    }
 }
