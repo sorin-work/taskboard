@@ -144,6 +144,26 @@ Roles: members can do everything with cards, columns, labels and comments;
 admins can also invite people, change roles, and archive or delete boards;
 owners can additionally delete the workspace and promote other owners.
 
+## Configuration
+
+The api reads standard ASP.NET Core configuration: `appsettings.json`, then
+environment variables (use `__` for nesting, e.g. `Jwt__Secret`).
+
+| Setting                               | Default                         | What it does                                   |
+| ------------------------------------- | ------------------------------- | ---------------------------------------------- |
+| `ConnectionStrings__Default`          | Postgres on `localhost:5444`    | Database connection                            |
+| `Jwt__Secret`                         | none (dev value in Development) | Signs tokens; at least 32 characters           |
+| `Jwt__LifetimeHours`                  | `168`                           | How long a sign-in lasts                       |
+| `Database__MigrateOnStartup`          | `false` (`true` in compose)     | Apply EF Core migrations when the api starts   |
+| `SEED_DEMO`                           | `false` (`true` in compose)     | Create the demo account and data               |
+| `App__PublicUrl`                      | `http://localhost:5184`         | Base of the invitation links                   |
+| `RateLimiting__AuthPermitsPerMinute`  | `10`                            | Sign in / sign up attempts per client per minute |
+
+Compose reads `DB_PORT`, `API_PORT`, `WEB_PORT`, `JWT_SECRET` and `SEED_DEMO`
+from `.env` (see `.env.example`). In development the api serves its OpenAPI
+document at `/openapi/v1.json`. In production it logs JSON, one line per
+entry, with the request id that's also returned in the `X-Request-Id` header.
+
 ## Tests
 
 ```bash
