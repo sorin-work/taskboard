@@ -28,6 +28,7 @@ public static class ChecklistEndpoints
         var item = app.MapGroup("/api/checklist-items/{itemId:guid}").WithTags("Checklists").RequireAuthorization();
         item.MapPatch("/", UpdateItemAsync).Validate<UpdateChecklistItemRequest>();
         item.MapDelete("/", DeleteItemAsync);
+        item.MapPost("/move", MoveItemAsync).Validate<MoveChecklistItemRequest>();
 
         return app;
     }
@@ -124,6 +125,32 @@ public static class ChecklistEndpoints
         item.IsDone = request.Done;
         await db.SaveChangesAsync(ct);
         return ToDto(item);
+    }
+
+    /// <summary>Moves an item to a zero-based position within its checklist and returns the checklist.</summary>
+    private static async Task<ChecklistDto> MoveItemAsync(
+        Guid itemId,
+        MoveChecklistItemRequest request,
+        ClaimsPrincipal principal,
+        WorkspaceAccess access,
+        TaskboardDbContext db,
+        CancellationToken ct)
+    {
+        var item = await FindItemAsync(db, access, itemId, principal.GetUserId(), ct);
+        var items = await db.ChecklistItems
+            .Where(i => i.ChecklistId == item.ChecklistId)
+            .OrderBy(i => i.Position)
+            .ToListAsync(ct);
+
+        items.Remove(items.Single(i => i.Id == item.Id));
+        items.Insert(Math.Min(request.Position, items.Count), item);
+        for (var i = 0; i < items.Count; i++)
+        {
+            items[i].Position = i;
+        }
+
+        await db.SaveChangesAsync(ct);
+        return ToDto(item.Checklist);
     }
 
     private static async Task<IResult> DeleteItemAsync(

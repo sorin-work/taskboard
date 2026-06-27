@@ -25,3 +25,11 @@ public sealed class UpdateChecklistItemRequestValidator : AbstractValidator<Upda
         RuleFor(r => r.Text).NotEmpty().MaximumLength(300);
     }
 }
+
+public sealed class MoveChecklistItemRequestValidator : AbstractValidator<MoveChecklistItemRequest>
+{
+    public MoveChecklistItemRequestValidator()
+    {
+        RuleFor(r => r.Position).GreaterThanOrEqualTo(0);
+    }
+}
