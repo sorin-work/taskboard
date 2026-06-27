@@ -83,6 +83,13 @@ export function ChecklistView({ card, checklist }: { card: Card; checklist: Chec
       cardsApi.updateItem(id, itemText, value),
     onSuccess: refresh,
   });
+  const moveItem = useMutation({
+    mutationFn: ({ id, position }: { id: string; position: number }) =>
+      cardsApi.moveItem(id, position),
+    onSuccess: refresh,
+  });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
   const removeItem = useMutation({
     mutationFn: (id: string) => cardsApi.deleteItem(id),
     onSuccess: refresh,
@@ -128,26 +135,79 @@ export function ChecklistView({ card, checklist }: { card: Card; checklist: Chec
         <div style={{ width: `${percent}%` }} />
       </div>
       <ul className="checklist-items">
-        {checklist.items.map((item) => (
+        {checklist.items.map((item, index) => (
           <li key={item.id} className={item.done ? 'done' : undefined}>
-            <label>
-              <input
-                type="checkbox"
-                checked={item.done}
-                onChange={(e) =>
-                  toggle.mutate({ id: item.id, itemText: item.text, value: e.target.checked })
-                }
-              />
-              {item.text}
-            </label>
-            <button
-              type="button"
-              className="icon-button"
-              aria-label={`Delete ${item.text}`}
-              onClick={() => removeItem.mutate(item.id)}
-            >
-              ×
-            </button>
+            {editingId === item.id ? (
+              <form
+                className="inline-add"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (editText.trim()) {
+                    toggle.mutate({ id: item.id, itemText: editText.trim(), value: item.done });
+                  }
+                  setEditingId(null);
+                }}
+              >
+                <input
+                  aria-label={`Edit ${item.text}`}
+                  autoFocus
+                  value={editText}
+                  maxLength={300}
+                  onChange={(e) => setEditText(e.target.value)}
+                  onBlur={() => setEditingId(null)}
+                />
+              </form>
+            ) : (
+              <label>
+                <input
+                  type="checkbox"
+                  checked={item.done}
+                  onChange={(e) =>
+                    toggle.mutate({ id: item.id, itemText: item.text, value: e.target.checked })
+                  }
+                />
+                {item.text}
+              </label>
+            )}
+            <span className="item-actions">
+              <button
+                type="button"
+                className="icon-button"
+                aria-label={`Rename ${item.text}`}
+                onClick={() => {
+                  setEditText(item.text);
+                  setEditingId(item.id);
+                }}
+              >
+                ✎
+              </button>
+              <button
+                type="button"
+                className="icon-button"
+                aria-label={`Move ${item.text} up`}
+                disabled={index === 0 || moveItem.isPending}
+                onClick={() => moveItem.mutate({ id: item.id, position: index - 1 })}
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                className="icon-button"
+                aria-label={`Move ${item.text} down`}
+                disabled={index === checklist.items.length - 1 || moveItem.isPending}
+                onClick={() => moveItem.mutate({ id: item.id, position: index + 1 })}
+              >
+                ↓
+              </button>
+              <button
+                type="button"
+                className="icon-button"
+                aria-label={`Delete ${item.text}`}
+                onClick={() => removeItem.mutate(item.id)}
+              >
+                ×
+              </button>
+            </span>
           </li>
         ))}
       </ul>
@@ -166,7 +226,13 @@ export function ChecklistView({ card, checklist }: { card: Card; checklist: Chec
         )}
       </form>
       <ErrorMessage
-        error={addItem.error ?? toggle.error ?? removeItem.error ?? removeChecklist.error}
+        error={
+          addItem.error ??
+          toggle.error ??
+          moveItem.error ??
+          removeItem.error ??
+          removeChecklist.error
+        }
       />
     </div>
   );

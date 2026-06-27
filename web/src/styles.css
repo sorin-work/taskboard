@@ -1485,3 +1485,14 @@ mark {
 .star-button:hover {
   color: #f79009;
 }
+
+.item-actions {
+  display: flex;
+  gap: 0.1rem;
+  opacity: 0.35;
+}
+
+.checklist-items li:hover .item-actions,
+.item-actions:focus-within {
+  opacity: 1;
+}

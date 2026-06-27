@@ -34,6 +34,8 @@ export const cardsApi = {
     api<ChecklistItem>(`/checklists/${checklistId}/items`, { method: 'POST', body: { text } }),
   updateItem: (itemId: string, text: string, done: boolean) =>
     api<ChecklistItem>(`/checklist-items/${itemId}`, { method: 'PATCH', body: { text, done } }),
+  moveItem: (itemId: string, position: number) =>
+    api<Checklist>(`/checklist-items/${itemId}/move`, { method: 'POST', body: { position } }),
   deleteItem: (itemId: string) => api<void>(`/checklist-items/${itemId}`, { method: 'DELETE' }),
 
   comments: (cardId: string) => api<Comment[]>(`/cards/${cardId}/comments`),
