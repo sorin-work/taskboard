@@ -71,4 +71,33 @@ describe('ChecklistView', () => {
     expect(JSON.parse(fetchMock.mock.calls[0]![1]!.body as string)).toEqual({ text: 'Tweet' });
     expect(screen.getByLabelText('Add an item to Launch steps')).toHaveValue('');
   });
+
+  it('moves an item down', async () => {
+    const fetchMock = mockApi({
+      'POST /api/checklist-items/i1/move': () => ({ body: checklist }),
+    });
+    renderChecklist();
+
+    expect(screen.getByLabelText('Move Write post up')).toBeDisabled();
+    await userEvent.click(screen.getByLabelText('Move Write post down'));
+
+    expect(JSON.parse(fetchMock.mock.calls[0]![1]!.body as string)).toEqual({ position: 1 });
+  });
+
+  it('renames an item', async () => {
+    const fetchMock = mockApi({
+      'PATCH /api/checklist-items/i2': () => ({ body: {} }),
+    });
+    renderChecklist();
+
+    await userEvent.click(screen.getByLabelText('Rename Send newsletter'));
+    const field = screen.getByLabelText('Edit Send newsletter');
+    await userEvent.clear(field);
+    await userEvent.type(field, 'Send the newsletter{Enter}');
+
+    expect(JSON.parse(fetchMock.mock.calls[0]![1]!.body as string)).toEqual({
+      text: 'Send the newsletter',
+      done: false,
+    });
+  });
 });
