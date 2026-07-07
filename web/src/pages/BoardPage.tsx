@@ -12,6 +12,7 @@ import { useBoardData } from '../board/useBoardData';
 import { Avatar } from '../components/Avatar';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { StarButton } from '../components/StarButton';
+import { collapsedColumns } from '../lib/collapsedColumns';
 import { activeFilterCount } from '../lib/filters';
 import { keyboardMoveTarget } from '../lib/keyboardMove';
 import type { Direction } from '../lib/keyboardMove';
@@ -25,6 +26,7 @@ export function BoardPage() {
   const [showLabels, setShowLabels] = useState(false);
   const [panel, setPanel] = useState<'activity' | 'archive' | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => collapsedColumns.get(boardId));
 
   const { board, cards, filters, setFilters, move } = useBoardData(boardId);
 
@@ -150,6 +152,8 @@ export function BoardPage() {
               onDragEnd={() => setDraggingId(null)}
               onDropCard={dropCard}
               onKeyboardMove={keyboardMove}
+              collapsed={collapsed.includes(column.id)}
+              onToggleCollapsed={() => setCollapsed(collapsedColumns.toggle(boardId, column.id))}
             />
           ))}
           <AddColumnForm boardId={boardId} />

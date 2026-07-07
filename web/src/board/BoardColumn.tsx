@@ -20,6 +20,8 @@ interface BoardColumnProps {
   onDragEnd: () => void;
   onDropCard: (cardId: string, columnId: string, afterCardId: string | null) => void;
   onKeyboardMove: (cardId: string, direction: Direction) => void;
+  collapsed?: boolean;
+  onToggleCollapsed?: () => void;
 }
 
 export function BoardColumn({
@@ -35,6 +37,8 @@ export function BoardColumn({
   onDragEnd,
   onDropCard,
   onKeyboardMove,
+  collapsed = false,
+  onToggleCollapsed,
 }: BoardColumnProps) {
   const listRef = useRef<HTMLOListElement>(null);
   const [dropAt, setDropAt] = useState<number | null>(null);
@@ -67,6 +71,22 @@ export function BoardColumn({
     }
   }
 
+  if (collapsed) {
+    return (
+      <section className="board-column collapsed" aria-label={column.name}>
+        <button
+          type="button"
+          className="collapsed-toggle"
+          aria-label={`Expand ${column.name}`}
+          onClick={onToggleCollapsed}
+        >
+          <span className="collapsed-name">{column.name}</span>
+          <span className="count">{cards.length}</span>
+        </button>
+      </section>
+    );
+  }
+
   return (
     <section
       className={[
@@ -90,6 +110,7 @@ export function BoardColumn({
         column={column}
         columnCount={columnCount}
         cardCount={cards.length}
+        onCollapse={onToggleCollapsed}
       />
       <ol className="card-list" ref={listRef}>
         {cards.map((card, i) => (

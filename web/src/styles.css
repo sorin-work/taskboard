@@ -1496,3 +1496,19 @@ mark {
 .item-actions:focus-within {
   opacity: 1;
 }
+
+.board-column.collapsed {
+  flex: 0 0 2.6rem;
+  padding: 0.4rem 0.2rem;
+}
+
+.collapsed-toggle {
+  border: none;
+  background: none;
+  writing-mode: vertical-rl;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  font-weight: 600;
+}

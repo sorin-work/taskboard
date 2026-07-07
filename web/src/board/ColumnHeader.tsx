@@ -11,9 +11,16 @@ interface ColumnHeaderProps {
   column: Column;
   columnCount: number;
   cardCount: number;
+  onCollapse?: () => void;
 }
 
-export function ColumnHeader({ boardId, column, columnCount, cardCount }: ColumnHeaderProps) {
+export function ColumnHeader({
+  boardId,
+  column,
+  columnCount,
+  cardCount,
+  onCollapse,
+}: ColumnHeaderProps) {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(column.name);
@@ -147,6 +154,17 @@ export function ColumnHeader({ boardId, column, columnCount, cardCount }: Column
             >
               Move right
             </button>
+            {onCollapse && (
+              <button
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onCollapse();
+                }}
+              >
+                Collapse
+              </button>
+            )}
             <button role="menuitem" onClick={promptWipLimit}>
               {column.wipLimit === null ? 'Set WIP limit…' : 'Change WIP limit…'}
             </button>
