@@ -26,7 +26,13 @@ export function BoardPage() {
   const [showLabels, setShowLabels] = useState(false);
   const [panel, setPanel] = useState<'activity' | 'archive' | null>(null);
   const [showSettings, setShowSettings] = useState(false);
-  const [collapsed, setCollapsed] = useState(() => collapsedColumns.get(boardId));
+  // Keyed by board: the page component is reused when you switch boards.
+  const [collapsedState, setCollapsedState] = useState(() => ({
+    boardId,
+    ids: collapsedColumns.get(boardId),
+  }));
+  const collapsed =
+    collapsedState.boardId === boardId ? collapsedState.ids : collapsedColumns.get(boardId);
 
   const { board, cards, filters, setFilters, move } = useBoardData(boardId);
 
@@ -153,7 +159,9 @@ export function BoardPage() {
               onDropCard={dropCard}
               onKeyboardMove={keyboardMove}
               collapsed={collapsed.includes(column.id)}
-              onToggleCollapsed={() => setCollapsed(collapsedColumns.toggle(boardId, column.id))}
+              onToggleCollapsed={() =>
+                setCollapsedState({ boardId, ids: collapsedColumns.toggle(boardId, column.id) })
+              }
             />
           ))}
           <AddColumnForm boardId={boardId} />
