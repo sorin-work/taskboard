@@ -28,6 +28,7 @@ public static class CardEndpoints
         card.MapDelete("/", DeleteAsync);
         card.MapPost("/archive", ArchiveAsync);
         card.MapPost("/restore", RestoreAsync);
+        card.MapPost("/duplicate", DuplicateAsync);
         card.MapPost("/move", MoveAsync).Validate<MoveCardRequest>();
 
         app.MapCardPeopleEndpoints();
@@ -224,6 +225,65 @@ public static class CardEndpoints
         }
 
         return await LoadCardAsync(db, cardId, ct);
+    }
+
+    /// <summary>
+    /// A copy at the bottom of the same column, with the same description, due
+    /// date, people, labels and checklists (all unticked). Comments stay behind.
+    /// </summary>
+    private static async Task<IResult> DuplicateAsync(
+        Guid cardId,
+        ClaimsPrincipal principal,
+        WorkspaceAccess access,
+        TaskboardDbContext db,
+        ActivityLog activity,
+        TimeProvider clock,
+        CancellationToken ct)
+    {
+        var userId = principal.GetUserId();
+        await access.RequireCardAsync(cardId, userId, ct: ct);
+        var source = await db.Cards
+            .AsNoTracking()
+            .Include(c => c.Labels)
+            .Include(c => c.Assignees)
+            .Include(c => c.Checklists).ThenInclude(l => l.Items)
+            .Include(c => c.Column)
+            .SingleAsync(c => c.Id == cardId, ct);
+
+        var last = await db.Cards
+            .Where(c => c.ColumnId == source.ColumnId && c.ArchivedAt == null)
+            .MaxAsync(c => (long?)c.Position, ct);
+        var now = clock.GetUtcNow().UtcDateTime;
+        var id = Guid.NewGuid();
+        var title = source.Title.Length <= 193 ? $"{source.Title} (copy)" : source.Title;
+        var copy = new Card
+        {
+            Id = id,
+            BoardId = source.BoardId,
+            ColumnId = source.ColumnId,
+            Title = title,
+            Description = source.Description,
+            Position = CardPositions.Between(last, null)!.Value,
+            DueDate = source.DueDate,
+            CreatedById = userId,
+            CreatedAt = now,
+            UpdatedAt = now,
+            Labels = [.. source.Labels.Select(l => new CardLabel { CardId = id, LabelId = l.LabelId })],
+            Assignees = [.. source.Assignees.Select(a => new CardAssignee { CardId = id, UserId = a.UserId })],
+            Checklists = [.. source.Checklists.Select(l => new Checklist
+            {
+                Id = Guid.NewGuid(),
+                CardId = id,
+                Title = l.Title,
+                Position = l.Position,
+                Items = [.. l.Items.Select(i => new ChecklistItem { Id = Guid.NewGuid(), Text = i.Text, Position = i.Position })],
+            })],
+        };
+        db.Cards.Add(copy);
+        activity.Card(copy, userId, ActivityTypes.CardCreated, new() { ["column"] = source.Column.Name, ["copiedFrom"] = source.Title });
+        await db.SaveChangesAsync(ct);
+
+        return Results.Created($"/api/cards/{id}", await LoadCardAsync(db, id, ct));
     }
 
     private static async Task<CardDto> MoveAsync(
