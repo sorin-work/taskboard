@@ -19,6 +19,11 @@ export function describeActivity(activity: Activity, onCard = false): string {
     case 'column.deleted':
       return `deleted the column "${d.column}"`;
     case 'card.created':
+      if (d.copiedFrom) {
+        return onCard
+          ? `created this card as a copy of "${d.copiedFrom}"`
+          : `copied "${d.copiedFrom}" to ${card}`;
+      }
       return onCard ? `created this card in ${d.column}` : `added ${card} to ${d.column}`;
     case 'card.renamed':
       return `renamed "${d.from}" to "${d.title}"`;

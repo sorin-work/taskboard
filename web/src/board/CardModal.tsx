@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { boardsApi } from '../api/boards';
 import { cardsApi } from '../api/cards';
@@ -77,6 +78,19 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKeys.card(card.id), updated);
       refreshBoard();
+    },
+  });
+
+  const [, setParams] = useSearchParams();
+  const duplicate = useMutation({
+    mutationFn: () => cardsApi.duplicate(card.id),
+    onSuccess: (copy) => {
+      refreshBoard();
+      setParams((current) => {
+        const next = new URLSearchParams(current);
+        next.set('card', copy.id);
+        return next;
+      });
     },
   });
 
@@ -181,7 +195,9 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
         </section>
 
         <ChecklistSection card={card} />
-        <ErrorMessage error={update.error ?? move.error ?? archive.error ?? remove.error} />
+        <ErrorMessage
+          error={update.error ?? move.error ?? archive.error ?? duplicate.error ?? remove.error}
+        />
         <CommentsSection card={card} role={board.role} />
         <CardActivity cardId={card.id} />
       </div>
@@ -231,6 +247,9 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
           </select>
         </div>
 
+        <button type="button" onClick={() => duplicate.mutate()} disabled={duplicate.isPending}>
+          Duplicate card
+        </button>
         <button type="button" onClick={() => archive.mutate()} disabled={archive.isPending}>
           {card.archivedAt ? 'Restore card' : 'Archive card'}
         </button>

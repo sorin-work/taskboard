@@ -30,6 +30,18 @@ describe('describeActivity', () => {
     );
   });
 
+  it('describes duplicated cards', () => {
+    expect(
+      describeActivity(
+        entry(
+          'card.created',
+          { column: 'To do', copiedFrom: 'Weekly report' },
+          'Weekly report (copy)',
+        ),
+      ),
+    ).toBe('copied "Weekly report" to "Weekly report (copy)"');
+  });
+
   it('falls back to the stored title for deleted cards', () => {
     expect(describeActivity(entry('card.deleted', { title: 'Old idea' }, null))).toBe(
       'deleted "Old idea"',
