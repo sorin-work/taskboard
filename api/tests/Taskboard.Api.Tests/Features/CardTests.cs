@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Http.Json;
 using Taskboard.Api.Features.Boards;
 using Taskboard.Api.Features.Cards;
+using Taskboard.Api.Features.Checklists;
+using Taskboard.Api.Features.Comments;
 using Taskboard.Api.Tests.Infrastructure;
 
 namespace Taskboard.Api.Tests.Features;
@@ -230,5 +232,29 @@ public class CardTests(TaskboardApiFactory factory) : IClassFixture<TaskboardApi
             new UpdateCardRequest(card.Title, null, new DateOnly(year, month, day)));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Duplicate_CopiesDetailsButNotProgressOrComments()
+    {
+        var (client, board) = await BoardAsync();
+        var card = await client.CreateCardAsync(board.Columns[0].Id, "Weekly report");
+        await client.CreateCardAsync(board.Columns[0].Id, "Something else");
+        await client.PutAsJsonAsync($"/api/cards/{card.Id}", new UpdateCardRequest(card.Title, "Same every week", new DateOnly(2026, 7, 10)));
+        var checklist = await (await client.PostAsJsonAsync($"/api/cards/{card.Id}/checklists", new ChecklistRequest("Steps"))).ReadAsAsync<ChecklistDto>();
+        var item = await (await client.PostAsJsonAsync($"/api/checklists/{checklist.Id}/items", new CreateChecklistItemRequest("Pull numbers"))).ReadAsAsync<ChecklistItemDto>();
+        await client.PatchAsJsonAsync($"/api/checklist-items/{item.Id}", new UpdateChecklistItemRequest("Pull numbers", true));
+        await client.PostAsJsonAsync($"/api/cards/{card.Id}/comments", new CommentRequest("Done for this week"));
+
+        var response = await client.PostAsync($"/api/cards/{card.Id}/duplicate", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var copy = await response.ReadAsAsync<CardDto>();
+        copy.Title.Should().Be("Weekly report (copy)");
+        copy.Description.Should().Be("Same every week");
+        copy.DueDate.Should().Be(new DateOnly(2026, 7, 10));
+        copy.Checklists.Single().Items.Single().Done.Should().BeFalse();
+        (await client.GetCardsAsync(board.Id)).Select(c => c.Title).Should().Equal("Weekly report", "Something else", "Weekly report (copy)");
+        (await client.GetCardsAsync(board.Id)).Last().CommentCount.Should().Be(0);
     }
 }
