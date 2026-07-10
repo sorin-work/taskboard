@@ -17,6 +17,8 @@ public static class MemberEndpoints
         group.MapPatch("/{userId:guid}", UpdateRoleAsync).Validate<UpdateMemberRequest>();
         group.MapDelete("/{userId:guid}", RemoveAsync);
 
+        app.MapGet("/api/workspaces/{workspaceId:guid}/workload", WorkloadAsync).WithTags("Members").RequireAuthorization();
+
         return app;
     }
 
@@ -34,6 +36,39 @@ public static class MemberEndpoints
             .ToListAsync(ct);
 
         return [.. members.OrderByDescending(m => m.Role).ThenBy(m => m.DisplayName, StringComparer.OrdinalIgnoreCase)];
+    }
+
+    /// <summary>Open cards per member on the workspace's active boards, to spot who's overloaded.</summary>
+    private static async Task<List<WorkloadDto>> WorkloadAsync(
+        Guid workspaceId,
+        DateOnly? today,
+        ClaimsPrincipal principal,
+        WorkspaceAccess access,
+        TaskboardDbContext db,
+        TimeProvider clock,
+        CancellationToken ct)
+    {
+        await access.RequireMemberAsync(workspaceId, principal.GetUserId(), ct: ct);
+        var day = today ?? DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        var weekEnd = day.AddDays(6);
+
+        var open = db.CardAssignees.Where(a =>
+            a.Card.Board.WorkspaceId == workspaceId &&
+            a.Card.Board.ArchivedAt == null &&
+            a.Card.ArchivedAt == null &&
+            a.Card.CompletedAt == null);
+
+        var rows = await db.WorkspaceMembers
+            .Where(m => m.WorkspaceId == workspaceId)
+            .Select(m => new WorkloadDto(
+                m.UserId,
+                m.User.DisplayName,
+                open.Count(a => a.UserId == m.UserId),
+                open.Count(a => a.UserId == m.UserId && a.Card.DueDate < day),
+                open.Count(a => a.UserId == m.UserId && a.Card.DueDate >= day && a.Card.DueDate <= weekEnd)))
+            .ToListAsync(ct);
+
+        return [.. rows.OrderByDescending(r => r.Open).ThenBy(r => r.DisplayName, StringComparer.OrdinalIgnoreCase)];
     }
 
     private static async Task<MemberDto> UpdateRoleAsync(
