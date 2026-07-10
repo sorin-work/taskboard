@@ -2,12 +2,12 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { CreatedInvitation, Member, Role } from '../api/types';
+import type { CreatedInvitation, Member, Role, Workload } from '../api/types';
 import { workspacesApi } from '../api/workspaces';
 import { useAuth } from '../auth/AuthContext';
 import { Avatar } from '../components/Avatar';
 import { ErrorMessage } from '../components/ErrorMessage';
-import { formatRelative } from '../lib/dates';
+import { formatRelative, todayIso } from '../lib/dates';
 import { queryKeys } from '../lib/queryKeys';
 
 const ROLE_LABELS: Record<Role, string> = { owner: 'Owner', admin: 'Admin', member: 'Member' };
@@ -22,6 +22,12 @@ export function MembersPage() {
     queryKey: queryKeys.members(workspaceId),
     queryFn: () => workspacesApi.members(workspaceId),
   });
+
+  const workload = useQuery({
+    queryKey: ['workspaces', workspaceId, 'workload'],
+    queryFn: () => workspacesApi.workload(workspaceId, todayIso()),
+  });
+  const loadFor = (userId: string) => workload.data?.find((w) => w.userId === userId);
 
   const myRole = workspace.data?.role ?? 'member';
   const canManage = myRole !== 'member';
@@ -44,6 +50,7 @@ export function MembersPage() {
             workspaceId={workspaceId}
             member={member}
             myRole={myRole}
+            load={loadFor(member.userId)}
           />
         ))}
       </ul>
@@ -130,10 +137,12 @@ function MemberRow({
   workspaceId,
   member,
   myRole,
+  load,
 }: {
   workspaceId: string;
   member: Member;
   myRole: Role;
+  load?: Workload;
 }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -176,6 +185,15 @@ function MemberRow({
         </strong>
         <span className="muted small">{member.email}</span>
       </div>
+      {load && (
+        <span className="workload small" aria-label={`Workload for ${member.displayName}`}>
+          {load.open} open
+          {load.overdue > 0 && (
+            <span className="due-badge due-overdue">{load.overdue} overdue</span>
+          )}
+          {load.dueThisWeek > 0 && <span className="muted"> · {load.dueThisWeek} this week</span>}
+        </span>
+      )}
       {canChangeRole ? (
         <select
           aria-label={`Role for ${member.displayName}`}

@@ -6,6 +6,7 @@ import type {
   Member,
   Role,
   SearchResult,
+  Workload,
   Workspace,
 } from './types';
 
@@ -20,6 +21,8 @@ export const workspacesApi = {
     api<SearchResult[]>(`/workspaces/${id}/search?q=${encodeURIComponent(q)}`),
 
   members: (id: string) => api<Member[]>(`/workspaces/${id}/members`),
+  workload: (id: string, today: string) =>
+    api<Workload[]>(`/workspaces/${id}/workload?today=${today}`),
   setRole: (id: string, userId: string, role: Role) =>
     api<Member>(`/workspaces/${id}/members/${userId}`, { method: 'PATCH', body: { role } }),
   removeMember: (id: string, userId: string) =>

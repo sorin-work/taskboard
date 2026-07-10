@@ -203,3 +203,11 @@ export interface SearchResult {
   dueDate: string | null;
   completed: boolean;
 }
+
+export interface Workload {
+  userId: string;
+  displayName: string;
+  open: number;
+  overdue: number;
+  dueThisWeek: number;
+}

@@ -1512,3 +1512,10 @@ mark {
   padding: 0.4rem 0;
   font-weight: 600;
 }
+
+.workload {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+}
