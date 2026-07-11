@@ -73,15 +73,7 @@ export interface Column {
 }
 
 export type LabelColor =
-  | 'gray'
-  | 'red'
-  | 'orange'
-  | 'yellow'
-  | 'green'
-  | 'teal'
-  | 'blue'
-  | 'purple'
-  | 'pink';
+  'gray' | 'red' | 'orange' | 'yellow' | 'green' | 'teal' | 'blue' | 'purple' | 'pink';
 
 export interface Label {
   id: string;

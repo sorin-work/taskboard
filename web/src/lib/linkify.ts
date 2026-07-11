@@ -1,6 +1,5 @@
 export type TextPart =
-  | { kind: 'text'; text: string }
-  | { kind: 'link'; text: string; href: string };
+  { kind: 'text'; text: string } | { kind: 'link'; text: string; href: string };
 
 const URL_PATTERN = /\bhttps?:\/\/[^\s<>"]+/gi;
 // Punctuation that usually ends a sentence rather than belonging to the url.
