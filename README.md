@@ -13,19 +13,36 @@ due dates. "My tasks" collects everything assigned to you in one list.
 - **Cards**: drag and drop within and between columns, with a stable order
   that survives reloads; description, assignees, labels, due date, checklists
   and comments
+- **Archive**: archive cards instead of deleting them, and restore them from
+  the board's archive; duplicate a card to reuse it
 - **WIP limits**: optional per column; the column turns red when it's over
 - **Copy a board**: reuse a board's columns and labels (and optionally its
   cards) for the next sprint or month
 - **Activity**: every board and every card keeps a log of who did what
 - **Filters**: narrow a board down by assignee, label, due date or text; the
   filters live in the URL so you can share a filtered view
+- **Starred boards** come first in the workspace's board list, and board
+  tiles show how many cards are overdue
+- **Workload**: the members page shows each person's open, overdue and
+  due-this-week cards
+- **Export**: download a board as CSV for spreadsheets or reports
 - **Search**: find cards by title or description across every board in a
   workspace
 - **My tasks**: cards assigned to you across all boards, grouped into overdue,
   today, the next few days, later and no due date; the top bar shows how many
   are overdue
-- **Small touches**: dark theme that follows your system, `/` to search a
-  board, and a layout that works on a phone
+- **Small touches**: dark theme that follows your system, collapsible
+  columns, clickable links in descriptions and comments, and a layout that
+  works on a phone
+
+### Keyboard
+
+| Keys                  | Does                                          |
+| --------------------- | --------------------------------------------- |
+| `/`                   | Jump to the board's search box                |
+| `Alt` + `↑` / `↓`     | Move the focused card up or down              |
+| `Alt` + `←` / `→`     | Move the focused card to the next column      |
+| `Esc`                 | Leave a text field, or close the card dialog  |
 
 ## Stack
 
@@ -124,13 +141,13 @@ except sign up, sign in, health and invitation previews need an
 | ----------- | ---------------------------------------------------------------------------------------- |
 | Auth        | `POST /auth/signup`, `POST /auth/login`, `GET/PATCH /auth/me`, `POST /auth/me/password`   |
 | Workspaces  | `GET/POST /workspaces`, `GET/PATCH/DELETE /workspaces/{id}`                              |
-| Members     | `GET /workspaces/{id}/members`, `PATCH/DELETE /workspaces/{id}/members/{userId}`          |
+| Members     | `GET /workspaces/{id}/members`, `PATCH/DELETE /workspaces/{id}/members/{userId}`, `GET /workspaces/{id}/workload` |
 | Invitations | `GET/POST /workspaces/{id}/invitations`, `DELETE .../{invitationId}`, `GET /invitations/{token}`, `POST /invitations/{token}/accept` |
-| Boards      | `GET/POST /workspaces/{id}/boards`, `GET/PATCH/DELETE /boards/{id}`                      |
-| Columns     | `POST /boards/{id}/columns`, `PATCH/DELETE /columns/{id}`, `POST /columns/{id}/move`     |
-| Cards       | `GET /boards/{id}/cards`, `POST /columns/{id}/cards`, `GET/PUT/DELETE /cards/{id}`, `POST /cards/{id}/move`, `PUT /cards/{id}/labels`, `PUT /cards/{id}/assignees` |
+| Boards      | `GET/POST /workspaces/{id}/boards`, `GET/PATCH/DELETE /boards/{id}`, `POST /boards/{id}/copy`, `PUT/DELETE /boards/{id}/star`, `GET /boards/{id}/export.csv` |
+| Columns     | `POST /boards/{id}/columns`, `PATCH/DELETE /columns/{id}`, `POST /columns/{id}/move`, `PUT /columns/{id}/wip-limit` |
+| Cards       | `GET /boards/{id}/cards`, `POST /columns/{id}/cards`, `GET/PUT/DELETE /cards/{id}`, `POST /cards/{id}/move`, `PUT /cards/{id}/labels`, `PUT /cards/{id}/assignees`, `POST /cards/{id}/archive`, `POST /cards/{id}/restore`, `POST /cards/{id}/duplicate` |
 | Labels      | `GET/POST /boards/{id}/labels`, `PATCH/DELETE /labels/{id}`                              |
-| Checklists  | `POST /cards/{id}/checklists`, `PATCH/DELETE /checklists/{id}`, `POST /checklists/{id}/items`, `PATCH/DELETE /checklist-items/{id}` |
+| Checklists  | `POST /cards/{id}/checklists`, `PATCH/DELETE /checklists/{id}`, `POST /checklists/{id}/items`, `PATCH/DELETE /checklist-items/{id}`, `POST /checklist-items/{id}/move` |
 | Comments    | `GET/POST /cards/{id}/comments`, `PATCH/DELETE /comments/{id}`                           |
 | Activity    | `GET /boards/{id}/activity?before=&limit=`, `GET /cards/{id}/activity`                   |
 | My tasks    | `GET /me/tasks?due=&includeCompleted=`                                                   |
