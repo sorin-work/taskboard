@@ -44,6 +44,9 @@ public class DemoSeederTests(TaskboardApiFactory factory) : IClassFixture<Taskbo
         boards!.Select(b => b.Name).Should().Contain("Website relaunch").And.NotContain("Old onboarding flow");
 
         var website = boards!.Single(b => b.Name == "Website relaunch");
+        boards![0].Should().Be(website, "the demo user starred it");
+        website.Starred.Should().BeTrue();
+        (await client.GetCardsAsync(website.Id, "?archived=true")).Should().ContainSingle();
         var cards = await client.GetCardsAsync(website.Id);
         cards.Should().HaveCountGreaterThan(10);
 

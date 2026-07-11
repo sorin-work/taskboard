@@ -78,11 +78,17 @@ public sealed partial class DemoSeeder(
         var content = Label(board, "Content", "yellow");
         var urgent = Label(board, "Urgent", "orange");
         var (backlog, todo, doing, review, done) = (board.Columns[0], board.Columns[1], board.Columns[2], board.Columns[3], board.Columns[4]);
+        doing.WipLimit = 3;
+        review.WipLimit = 2;
+        db.BoardStars.Add(new BoardStar { UserId = demo.Id, BoardId = board.Id, CreatedAt = _now.AddDays(-50) });
 
         Card(backlog, "Dark mode for the docs pages", demo, 30, labels: [design, frontend]);
         Card(backlog, "Localise pricing page (DE, FR)", priya, 26, labels: [content],
             description: "Marketing wants German and French first. Currency stays EUR for both.");
         Card(backlog, "Replace hand-rolled carousel with CSS scroll snap", marco, 18, labels: [frontend]);
+        var oldIdea = Card(backlog, "Animated mascot in the header", emma, 44, labels: [design],
+            comments: [(priya, "Parking this one, it doesn't fit the new brand.")]);
+        oldIdea.ArchivedAt = _now.AddDays(-30);
 
         Card(todo, "Write case study: Fernhill Logistics", priya, 21, assignees: [emma], due: 6, labels: [content],
             checklist: ("Draft", [("Interview notes", true), ("First draft", false), ("Customer sign-off", false)]));
