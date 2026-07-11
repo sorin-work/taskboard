@@ -10,6 +10,22 @@ const apiUrl = process.env.API_URL ?? 'http://localhost:4404';
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        // React and friends change less often than the app; cache them apart.
+        manualChunks: {
+          vendor: [
+            'react',
+            'react-dom',
+            'react-dom/client',
+            'react-router',
+            '@tanstack/react-query',
+          ],
+        },
+      },
+    },
+  },
   server: {
     port: 5184,
     proxy: {
