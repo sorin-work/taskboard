@@ -9,6 +9,12 @@ namespace Taskboard.Api.Tests.Features;
 public class StrictRateLimitFactory : TaskboardApiFactory
 {
     protected override int AuthPermitsPerMinute => 3;
+
+    protected override void ConfigureWebHost(Microsoft.AspNetCore.Hosting.IWebHostBuilder builder)
+    {
+        base.ConfigureWebHost(builder);
+        builder.UseSetting("ForwardedHeaders:Enabled", "true");
+    }
 }
 
 public class RateLimitTests(StrictRateLimitFactory factory) : IClassFixture<StrictRateLimitFactory>
@@ -28,6 +34,28 @@ public class RateLimitTests(StrictRateLimitFactory factory) : IClassFixture<Stri
         blocked.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
         blocked.Headers.RetryAfter.Should().NotBeNull();
         (await blocked.ReadAsAsync<ProblemDetails>()).Title.Should().Be("Too many requests");
+    }
+
+    [Fact]
+    public async Task Login_IsLimitedPerClientBehindTheProxy()
+    {
+        async Task<HttpStatusCode> AttemptAsync(string ip)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/auth/login")
+            {
+                Content = JsonContent.Create(new LoginRequest("x@example.com", "guess")),
+            };
+            request.Headers.Add("X-Forwarded-For", ip);
+            return (await factory.CreateClient().SendAsync(request)).StatusCode;
+        }
+
+        for (var i = 0; i < 3; i++)
+        {
+            await AttemptAsync("203.0.113.7");
+        }
+
+        (await AttemptAsync("203.0.113.7")).Should().Be(HttpStatusCode.TooManyRequests);
+        (await AttemptAsync("198.51.100.20")).Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact]

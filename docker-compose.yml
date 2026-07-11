@@ -25,6 +25,9 @@ services:
       App__PublicUrl: http://localhost:${WEB_PORT:-5184}
       # Applies EF Core migrations every time the container starts.
       Database__MigrateOnStartup: 'true'
+      # nginx sets X-Forwarded-For. Don't enable this if the api is exposed
+      # directly to untrusted clients.
+      ForwardedHeaders__Enabled: 'true'
       # Creates demo@example.com / demo-password with sample workspaces.
       SEED_DEMO: ${SEED_DEMO:-true}
     depends_on:
