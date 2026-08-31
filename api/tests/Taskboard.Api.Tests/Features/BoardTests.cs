@@ -181,6 +181,22 @@ public class BoardTests(TaskboardApiFactory factory) : IClassFixture<TaskboardAp
     }
 
     [Fact]
+    public async Task Copy_WithCards_LeavesArchivedCardsBehind()
+    {
+        var (client, _) = await factory.CreateUserAsync();
+        var workspace = await client.CreateWorkspaceAsync();
+        var source = await client.CreateBoardAsync(workspace.Id, "Sprint 7");
+        await client.CreateCardAsync(source.Columns[0].Id, "Still relevant");
+        var old = await client.CreateCardAsync(source.Columns[0].Id, "Dropped idea");
+        await client.PostAsync($"/api/cards/{old.Id}/archive", null);
+
+        var copy = await (await client.PostAsJsonAsync($"/api/boards/{source.Id}/copy", new CopyBoardRequest("Sprint 8", true))).ReadAsAsync<BoardDto>();
+
+        (await client.GetCardsAsync(copy.Id)).Select(c => c.Title).Should().Equal("Still relevant");
+        (await client.GetCardsAsync(copy.Id, "?archived=true")).Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task Copy_ByNonMember_ReturnsNotFound()
     {
         var (owner, _) = await factory.CreateUserAsync();

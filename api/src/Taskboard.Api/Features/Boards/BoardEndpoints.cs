@@ -178,8 +178,8 @@ public static class BoardEndpoints
     }
 
     /// <summary>
-    /// Copies columns and labels, and optionally the cards with their labels
-    /// and checklists. People, comments and history stay with the original.
+    /// Copies columns and labels, and optionally the cards (not archived ones)
+    /// with their labels and checklists. People, comments and history stay with the original.
     /// </summary>
     private static async Task<IResult> CopyAsync(
         Guid boardId,
@@ -225,7 +225,7 @@ public static class BoardEndpoints
                 .AsNoTracking()
                 .Include(c => c.Labels)
                 .Include(c => c.Checklists).ThenInclude(l => l.Items)
-                .Where(c => c.BoardId == source.Id)
+                .Where(c => c.BoardId == source.Id && c.ArchivedAt == null)
                 .AsSplitQuery()
                 .ToListAsync(ct);
             foreach (var card in cards)
