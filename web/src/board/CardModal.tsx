@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { boardsApi } from '../api/boards';
@@ -102,7 +102,15 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
     },
   });
 
+  // Escape means "never mind": the dialog blurs the field right after, and
+  // that blur must not save what was typed.
+  const cancelTitle = useRef(false);
+
   function saveTitle() {
+    if (cancelTitle.current) {
+      cancelTitle.current = false;
+      return;
+    }
     const trimmed = title.trim();
     if (!trimmed) {
       setTitle(card.title);
@@ -126,6 +134,9 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
             if (e.key === 'Enter') {
               e.preventDefault();
               e.currentTarget.blur();
+            } else if (e.key === 'Escape') {
+              cancelTitle.current = true;
+              setTitle(card.title);
             }
           }}
         />

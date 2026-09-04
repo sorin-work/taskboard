@@ -56,8 +56,44 @@ const summary = (id: string, columnId: string, position: number) => ({
   commentCount: 0,
 });
 
+const cardRoutes = {
+  'GET /api/cards/c1': () => ({ body: card }),
+  'GET /api/cards/c1/comments': () => ({ body: [] }),
+  'GET /api/cards/c1/activity': () => ({ body: [] }),
+};
+
 describe('CardModal', () => {
   afterEach(() => vi.unstubAllGlobals());
+
+  it('saves the title on enter', async () => {
+    const fetchMock = mockApi({
+      ...cardRoutes,
+      'PUT /api/cards/c1': () => ({ body: { ...card, title: 'Write the release notes' } }),
+    });
+    renderWithProviders(<CardModal board={board} cardId="c1" onClose={() => {}} />);
+
+    const title = await screen.findByLabelText('Title');
+    await userEvent.clear(title);
+    await userEvent.type(title, 'Write the release notes{Enter}');
+
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'PUT')).toBe(true),
+    );
+  });
+
+  it('throws away a title edit on escape', async () => {
+    const fetchMock = mockApi(cardRoutes);
+    const onClose = vi.fn();
+    renderWithProviders(<CardModal board={board} cardId="c1" onClose={onClose} />);
+
+    const title = await screen.findByLabelText('Title');
+    await userEvent.type(title, ' oops');
+    await userEvent.keyboard('{Escape}');
+
+    expect(title).toHaveValue('Write release notes');
+    expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'PUT')).toBe(false);
+    expect(onClose).not.toHaveBeenCalled();
+  });
 
   it('moves the card to the bottom of the chosen column', async () => {
     const fetchMock = mockApi({
