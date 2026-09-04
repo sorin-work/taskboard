@@ -37,9 +37,37 @@ export function FilterBar({ board, filters, onChange }: FilterBarProps) {
   }, [q, filters, onChange]);
 
   const set = (key: keyof CardFilters, value: string) => onChange({ ...filters, [key]: value });
+  const toggle = (key: keyof CardFilters, value: string) =>
+    set(key, filters[key] === value ? '' : value);
 
   return (
     <div className="filter-bar" role="search">
+      <div className="quick-filters" role="group" aria-label="Quick filters">
+        <button
+          type="button"
+          className="chip"
+          aria-pressed={filters.assignee === 'me'}
+          onClick={() => toggle('assignee', 'me')}
+        >
+          My cards
+        </button>
+        <button
+          type="button"
+          className="chip"
+          aria-pressed={filters.due === 'week'}
+          onClick={() => toggle('due', 'week')}
+        >
+          Due this week
+        </button>
+        <button
+          type="button"
+          className="chip"
+          aria-pressed={filters.due === 'overdue'}
+          onClick={() => toggle('due', 'overdue')}
+        >
+          Overdue
+        </button>
+      </div>
       <input
         ref={searchRef}
         type="search"
