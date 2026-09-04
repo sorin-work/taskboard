@@ -56,6 +56,22 @@ describe('FilterBar', () => {
     expect(screen.getByLabelText('Search cards')).toHaveValue('');
   });
 
+  it('toggles quick filters on and off', async () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<FilterBar board={board} filters={{}} onChange={onChange} />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'My cards' }));
+    expect(onChange).toHaveBeenLastCalledWith({ assignee: 'me' });
+
+    rerender(<FilterBar board={board} filters={{ assignee: 'me' }} onChange={onChange} />);
+    expect(screen.getByRole('button', { name: 'My cards' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'My cards' }));
+    expect(onChange).toHaveBeenLastCalledWith({ assignee: '' });
+  });
+
   it('hides the clear button without filters', () => {
     render(<FilterBar board={board} filters={{}} onChange={() => {}} />);
     expect(screen.queryByRole('button', { name: 'Clear filters' })).not.toBeInTheDocument();
