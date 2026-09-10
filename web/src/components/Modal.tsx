@@ -11,6 +11,17 @@ interface ModalProps {
 export function Modal({ label, onClose, children, wide }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
+  // Put focus back where it was (usually the card tile) when the dialog closes,
+  // so keyboard users don't land at the top of the page.
+  useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    return () => {
+      if (opener?.isConnected) {
+        opener.focus();
+      }
+    };
+  }, []);
+
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (event.key !== 'Escape' || event.defaultPrevented) {
