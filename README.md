@@ -181,6 +181,23 @@ from `.env` (see `.env.example`). In development the api serves its OpenAPI
 document at `/openapi/v1.json`. In production it logs JSON, one line per
 entry, with the request id that's also returned in the `X-Request-Id` header.
 
+## Troubleshooting
+
+- **Port already in use.** Something else is on 5444, 4404 or 5184. Pick
+  others in `.env` (`DB_PORT=5544` and so on) and run `docker compose up` again.
+- **The api keeps restarting.** `docker compose logs api` usually says why;
+  the most common cause is a `JWT_SECRET` shorter than 32 characters.
+- **Signed out straight after signing in.** Tokens are signed with
+  `JWT_SECRET`; changing it signs everyone out. Sign in again.
+- **Demo data missing.** The seed only runs when the demo user doesn't exist
+  yet and `SEED_DEMO=true`. `docker compose down -v` wipes the database so it
+  runs again.
+- **"Too many attempts".** Sign in and sign up allow ten tries a minute per
+  client. Wait a minute, or raise `RateLimiting__AuthPermitsPerMinute`.
+- **Dates look a day off.** Due dates are calendar dates; filters use the
+  browser's date. If they're still off, check the computer's clock and time
+  zone.
+
 ## Tests
 
 ```bash
