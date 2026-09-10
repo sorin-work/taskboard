@@ -16,7 +16,7 @@ public class WorkloadTests(TaskboardApiFactory factory) : IClassFixture<Taskboar
         var workspace = await owner.CreateWorkspaceAsync();
         factory.AddMember(workspace.Id, idle.Id);
         var board = await owner.CreateBoardAsync(workspace.Id);
-        var today = new DateOnly(2026, 7, 9);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
         async Task CardAsync(DateOnly? due, bool completed = false, bool archived = false)
         {
@@ -36,7 +36,7 @@ public class WorkloadTests(TaskboardApiFactory factory) : IClassFixture<Taskboar
         await CardAsync(today, archived: true);
 
         var workload = await owner.GetFromJsonAsync<List<WorkloadDto>>(
-            $"/api/workspaces/{workspace.Id}/workload?today=2026-07-09", TestJson.Options);
+            $"/api/workspaces/{workspace.Id}/workload?today={today:yyyy-MM-dd}", TestJson.Options);
 
         workload.Should().Equal(
             new WorkloadDto(ownerUser.Id, "Olga", 3, 1, 1),

@@ -49,7 +49,7 @@ public static class MemberEndpoints
         CancellationToken ct)
     {
         await access.RequireMemberAsync(workspaceId, principal.GetUserId(), ct: ct);
-        var day = today ?? DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        var day = Today.Resolve(today, clock);
         var weekEnd = day.AddDays(6);
 
         var open = db.CardAssignees.Where(a =>

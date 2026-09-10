@@ -41,8 +41,7 @@ public static class BoardEndpoints
         TimeProvider clock,
         CancellationToken ct)
     {
-        // The browser sends its own date so "overdue" matches what people see on the board.
-        var day = today ?? DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        var day = Today.Resolve(today, clock);
         var userId = principal.GetUserId();
         await access.RequireMemberAsync(workspaceId, userId, ct: ct);
         var query = db.Boards.Where(b => b.WorkspaceId == workspaceId);
