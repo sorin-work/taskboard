@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Taskboard.Api.Auth;
+using Taskboard.Api.Common;
 using Taskboard.Api.Data;
 using Taskboard.Api.Features.Cards;
 using Taskboard.Api.Features.Labels;
@@ -34,18 +35,19 @@ public static class MyTasksEndpoints
     private static async Task<List<MyTaskDto>> ListAsync(
         bool? includeCompleted,
         string? due,
+        DateOnly? today,
         ClaimsPrincipal principal,
         TaskboardDbContext db,
         TimeProvider clock,
         CancellationToken ct)
     {
         var userId = principal.GetUserId();
-        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        var day = Today.Resolve(today, clock);
 
         var cards = db.Cards.Where(c =>
             c.Board.ArchivedAt == null &&
             db.WorkspaceMembers.Any(m => m.WorkspaceId == c.Board.WorkspaceId && m.UserId == userId));
-        cards = new CardFilter("me", null, due, null).Apply(cards, userId, today);
+        cards = new CardFilter("me", null, due, null).Apply(cards, userId, day);
         if (includeCompleted != true)
         {
             cards = cards.Where(c => c.CompletedAt == null);

@@ -1,3 +1,4 @@
+import { todayIso } from '../lib/dates';
 import { api, download } from './client';
 import type {
   Activity,
@@ -50,8 +51,11 @@ export const boardsApi = {
   copy: (boardId: string, name: string, includeCards: boolean) =>
     api<Board>(`/boards/${boardId}/copy`, { method: 'POST', body: { name, includeCards } }),
 
+  // The due filters need "today" in the browser's time zone, not the server's.
   cards: (boardId: string, filters: CardFilters = {}) =>
-    api<CardSummary[]>(`/boards/${boardId}/cards${toQuery({ ...filters })}`),
+    api<CardSummary[]>(
+      `/boards/${boardId}/cards${toQuery({ ...filters, today: filters.due ? todayIso() : undefined })}`,
+    ),
   archivedCards: (boardId: string) => api<CardSummary[]>(`/boards/${boardId}/cards?archived=true`),
   activity: (boardId: string, before?: { createdAt: string; id: string }) =>
     api<Activity[]>(

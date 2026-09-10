@@ -9,9 +9,10 @@ namespace Taskboard.Api.Features.Cards;
 /// <c>label</c> = a label id;
 /// <c>due</c> = <c>overdue</c>, <c>today</c>, <c>week</c> or <c>none</c>;
 /// <c>q</c> = text in the title;
-/// <c>archived</c> = true to list archived cards instead of the board.
+/// <c>archived</c> = true to list archived cards instead of the board;
+/// <c>today</c> = the caller's date, for the due filters.
 /// </summary>
-public sealed record CardFilter(string? Assignee, Guid? Label, string? Due, string? Q, bool? Archived = null)
+public sealed record CardFilter(string? Assignee, Guid? Label, string? Due, string? Q, bool? Archived = null, DateOnly? Today = null)
 {
     public static readonly IReadOnlyList<string> DueOptions = ["overdue", "today", "week", "none"];
 

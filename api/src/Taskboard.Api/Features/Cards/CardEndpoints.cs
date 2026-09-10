@@ -46,7 +46,7 @@ public static class CardEndpoints
     {
         var userId = principal.GetUserId();
         await access.RequireBoardAsync(boardId, userId, ct: ct);
-        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        var today = Today.Resolve(filter.Today, clock);
         return await filter.Apply(db.Cards.Where(c => c.BoardId == boardId), userId, today)
             .OrderBy(c => c.Column.Position)
             .ThenBy(c => c.Position)

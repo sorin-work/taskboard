@@ -96,6 +96,25 @@ public class CardFilterTests(TaskboardApiFactory factory) : IClassFixture<Taskbo
     }
 
     [Fact]
+    public async Task Due_UsesTheCallersDate()
+    {
+        var s = await SetupAsync();
+        await CardAsync(s, "Tomorrow in UTC", due: _today.AddDays(1));
+
+        (await TitlesAsync(s, "?due=today")).Should().BeEmpty();
+        (await TitlesAsync(s, $"?due=today&today={_today.AddDays(1):yyyy-MM-dd}")).Should().Equal("Tomorrow in UTC");
+    }
+
+    [Fact]
+    public async Task Due_IgnoresACallerDateFarFromUtc()
+    {
+        var s = await SetupAsync();
+        await CardAsync(s, "Now", due: _today);
+
+        (await TitlesAsync(s, $"?due=today&today={_today.AddDays(30):yyyy-MM-dd}")).Should().Equal("Now");
+    }
+
+    [Fact]
     public async Task Q_MatchesTitleIgnoringCase()
     {
         var s = await SetupAsync();
