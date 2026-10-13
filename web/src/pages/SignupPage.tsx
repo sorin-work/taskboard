@@ -30,6 +30,10 @@ export function SignupPage() {
     signup.mutate();
   }
 
+  const loginLink = params.get('next')
+    ? `/login?next=${encodeURIComponent(params.get('next')!)}`
+    : '/login';
+
   const fieldError = (name: string) =>
     signup.error instanceof ApiError ? signup.error.fieldError(name) : undefined;
   const hasFieldErrors =
@@ -74,7 +78,7 @@ export function SignupPage() {
           {signup.isPending ? 'Creating account…' : 'Create account'}
         </button>
         <p className="muted">
-          Already have an account? <Link to="/login">Sign in</Link>
+          Already have an account? <Link to={loginLink}>Sign in</Link>
         </p>
       </form>
     </div>
