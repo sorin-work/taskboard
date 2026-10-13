@@ -22,6 +22,7 @@ public static class ExportEndpoints
         ClaimsPrincipal principal,
         WorkspaceAccess access,
         TaskboardDbContext db,
+        TimeProvider clock,
         CancellationToken ct)
     {
         var (board, _) = await access.RequireBoardAsync(boardId, principal.GetUserId(), ct: ct);
@@ -62,7 +63,7 @@ public static class ExportEndpoints
                 c.CreatedAt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
         }
 
-        var fileName = $"{Slug(board.Name)}-{DateTime.UtcNow:yyyy-MM-dd}.csv";
+        var fileName = $"{Slug(board.Name)}-{clock.GetUtcNow():yyyy-MM-dd}.csv";
         // BOM so Excel opens it as UTF-8.
         var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
         return Results.File(bytes, "text/csv; charset=utf-8", fileName);
