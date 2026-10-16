@@ -102,6 +102,19 @@ Open http://localhost:5184 and sign in with the demo account:
 - **Email:** `demo@example.com`
 - **Password:** `demo-password`
 
+The demo account (Jordan Lee) owns two workspaces:
+
+- **Northwind Studio**, shared with Priya (admin), Marco and Emma: a starred
+  "Website relaunch" board with five columns, WIP limits, labels, checklists,
+  comments and an archived card, plus a "Q1 marketing" board and an archived
+  onboarding board. A pending invitation for lena@example.com is waiting.
+- **Home renovation**, shared with Sam: a small kitchen project board.
+
+Due dates are set relative to the day the seed runs, so there is always
+something overdue, due today and coming up. The teammates can sign in too
+(`priya@example.com`, `marco@example.com`, `emma@example.com`,
+`sam@example.com`, all with `demo-password`) to try roles and assignments.
+
 | Service | URL / port                  | Notes                                  |
 | ------- | --------------------------- | -------------------------------------- |
 | web     | http://localhost:5184       | nginx; proxies `/api` to the api       |
