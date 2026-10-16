@@ -10,6 +10,25 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { formatRelative, todayIso } from '../lib/dates';
 import { queryKeys } from '../lib/queryKeys';
 
+/**
+ * navigator.clipboard only exists on https (and localhost). When the app is
+ * opened over plain http on a LAN address, fall back to selecting the field
+ * so the user can press Ctrl+C.
+ */
+async function copyLink(link: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(link);
+      return true;
+    }
+  } catch {
+    // Permission denied: fall through to selecting the text.
+  }
+  const field = document.querySelector<HTMLInputElement>('input[aria-label="Invitation link"]');
+  field?.select();
+  return false;
+}
+
 const ROLE_LABELS: Record<Role, string> = { owner: 'Owner', admin: 'Admin', member: 'Member' };
 
 export function MembersPage() {
@@ -233,7 +252,7 @@ function Invitations({ workspaceId, myRole }: { workspaceId: string; myRole: Rol
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<Role>('member');
   const [created, setCreated] = useState<CreatedInvitation | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<boolean | null>(null);
 
   const invitations = useQuery({
     queryKey: queryKeys.invitations(workspaceId),
@@ -243,7 +262,7 @@ function Invitations({ workspaceId, myRole }: { workspaceId: string; myRole: Rol
     mutationFn: () => workspacesApi.invite(workspaceId, email, role),
     onSuccess: (invitation) => {
       setCreated(invitation);
-      setCopied(false);
+      setCopied(null);
       setEmail('');
       queryClient.invalidateQueries({ queryKey: queryKeys.invitations(workspaceId) });
     },
@@ -295,13 +314,13 @@ function Invitations({ workspaceId, myRole }: { workspaceId: string; myRole: Rol
               value={link}
               onFocus={(e) => e.target.select()}
             />
-            <button
-              type="button"
-              onClick={() => navigator.clipboard?.writeText(link).then(() => setCopied(true))}
-            >
+            <button type="button" onClick={() => copyLink(link).then(setCopied)}>
               {copied ? 'Copied' : 'Copy'}
             </button>
           </div>
+          {copied === false && (
+            <p className="muted small">Couldn't copy automatically. Press Ctrl+C (⌘C on a Mac).</p>
+          )}
         </div>
       )}
 
