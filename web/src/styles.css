@@ -652,8 +652,15 @@ button:disabled {
 
 .card-side {
   display: grid;
-  gap: 1rem;
+  gap: 0.9rem;
   align-content: start;
+  border-left: 1px solid var(--divider);
+  padding-left: 1.25rem;
+}
+
+.card-side > button {
+  width: 100%;
+  text-align: left;
 }
 
 .card-side select,
@@ -667,6 +674,13 @@ button:disabled {
 @media (max-width: 720px) {
   .card-details {
     grid-template-columns: 1fr;
+  }
+
+  .card-side {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--divider);
+    padding-top: 1rem;
   }
 }
 
