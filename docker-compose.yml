@@ -3,6 +3,7 @@ name: taskboard
 services:
   db:
     image: postgres:17-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: taskboard
       POSTGRES_PASSWORD: taskboard
@@ -19,6 +20,7 @@ services:
 
   api:
     build: ./api
+    restart: unless-stopped
     environment:
       ConnectionStrings__Default: Host=db;Port=5432;Database=taskboard;Username=taskboard;Password=taskboard
       Jwt__Secret: ${JWT_SECRET:-local-development-secret-change-me-0123456789}
@@ -50,6 +52,7 @@ services:
 
   web:
     build: ./web
+    restart: unless-stopped
     depends_on:
       api:
         condition: service_healthy
