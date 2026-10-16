@@ -38,6 +38,12 @@ describe('formatDue', () => {
     expect(formatDue('2026-01-09', today)).toBe('Yesterday');
   });
 
+  it('counts days for the coming week', () => {
+    expect(formatDue('2026-01-12', today)).toBe('In 2 days');
+    expect(formatDue('2026-01-16', today)).toBe('In 6 days');
+    expect(formatDue('2026-01-17', today)).toBe('Jan 17');
+  });
+
   it('shows the same calendar day in every time zone', () => {
     expect(formatDue('2026-02-03', today)).toBe('Feb 3');
   });

@@ -51,6 +51,10 @@ export function formatDue(dueDate: string, today: string): string {
   if (dueDate === addDays(today, -1)) {
     return 'Yesterday';
   }
+  const days = Math.round((parseDate(dueDate).getTime() - parseDate(today).getTime()) / 86_400_000);
+  if (days > 1 && days < 7) {
+    return `In ${days} days`;
+  }
   const date = parseDate(dueDate);
   const sameYear = dueDate.slice(0, 4) === today.slice(0, 4);
   return date.toLocaleDateString('en', {
