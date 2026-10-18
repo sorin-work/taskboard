@@ -44,7 +44,7 @@ public static class MyTasksEndpoints
         var userId = principal.GetUserId();
         var day = Today.Resolve(today, clock);
 
-        var cards = db.Cards.Where(c =>
+        var cards = db.Cards.AsNoTracking().Where(c =>
             c.Board.ArchivedAt == null &&
             db.WorkspaceMembers.Any(m => m.WorkspaceId == c.Board.WorkspaceId && m.UserId == userId));
         cards = new CardFilter("me", null, due, null).Apply(cards, userId, day);

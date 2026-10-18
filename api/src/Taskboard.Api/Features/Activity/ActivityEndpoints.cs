@@ -81,6 +81,7 @@ public static class ActivityEndpoints
     private static async Task<List<ActivityDto>> ProjectAsync(IQueryable<Domain.Activity> query, int limit, CancellationToken ct)
     {
         var rows = await query
+            .AsNoTracking()
             .OrderByDescending(a => a.CreatedAt)
             .ThenByDescending(a => a.Id)
             .Take(limit)
