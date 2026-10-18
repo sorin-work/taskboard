@@ -16,6 +16,7 @@ import { collapsedColumns } from '../lib/collapsedColumns';
 import { activeFilterCount } from '../lib/filters';
 import { keyboardMoveTarget } from '../lib/keyboardMove';
 import type { Direction } from '../lib/keyboardMove';
+import { usePageTitle } from '../lib/usePageTitle';
 import { groupByColumn, isNoopMove } from '../lib/ordering';
 
 export function BoardPage() {
@@ -35,6 +36,7 @@ export function BoardPage() {
     collapsedState.boardId === boardId ? collapsedState.ids : collapsedColumns.get(boardId);
 
   const { board, cards, filters, setFilters, move } = useBoardData(boardId);
+  usePageTitle(board.data?.name);
 
   const openCard = (cardId: string | null) =>
     setParams((current) => {

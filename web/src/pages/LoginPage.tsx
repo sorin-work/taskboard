@@ -6,6 +6,7 @@ import { authApi } from '../api/auth';
 import { useAuth } from '../auth/AuthContext';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { FormField } from '../components/FormField';
+import { usePageTitle } from '../lib/usePageTitle';
 import { safeNext } from '../lib/navigation';
 
 export function LoginPage() {
@@ -15,6 +16,7 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  usePageTitle('Sign in');
   const login = useMutation({
     mutationFn: () => authApi.login(email, password),
     onSuccess: (response) => {

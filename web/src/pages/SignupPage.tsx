@@ -7,6 +7,7 @@ import { ApiError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { FormField } from '../components/FormField';
+import { usePageTitle } from '../lib/usePageTitle';
 import { safeNext } from '../lib/navigation';
 
 export function SignupPage() {
@@ -17,6 +18,7 @@ export function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  usePageTitle('Create your account');
   const signup = useMutation({
     mutationFn: () => authApi.signup(email, password, displayName),
     onSuccess: (response) => {

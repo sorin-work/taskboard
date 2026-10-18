@@ -6,6 +6,7 @@ import { LabelChip } from '../components/LabelChip';
 import { dueStatus, formatDue, todayIso } from '../lib/dates';
 import { DUE_OPTIONS } from '../lib/filters';
 import { queryKeys } from '../lib/queryKeys';
+import { usePageTitle } from '../lib/usePageTitle';
 import { groupTasks } from '../lib/tasks';
 
 export function MyTasksPage() {
@@ -25,6 +26,7 @@ export function MyTasksPage() {
   }
 
   const today = todayIso();
+  usePageTitle('My tasks');
 
   return (
     <section className="my-tasks">

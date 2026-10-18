@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { workspacesApi } from '../api/workspaces';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { Highlight } from '../components/Highlight';
+import { usePageTitle } from '../lib/usePageTitle';
 import { queryKeys } from '../lib/queryKeys';
 
 export function SearchPage() {
@@ -22,6 +23,8 @@ export function SearchPage() {
     queryFn: () => workspacesApi.search(workspaceId, q),
     enabled: q.trim().length >= 2,
   });
+
+  usePageTitle(q ? `Search: ${q}` : 'Search');
 
   function submit(event: FormEvent) {
     event.preventDefault();

@@ -4,9 +4,11 @@ import { useMutation } from '@tanstack/react-query';
 import { authApi } from '../api/auth';
 import { useAuth } from '../auth/AuthContext';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { usePageTitle } from '../lib/usePageTitle';
 import { FormField } from '../components/FormField';
 
 export function SettingsPage() {
+  usePageTitle('Settings');
   return (
     <section className="settings-page">
       <h1>Settings</h1>

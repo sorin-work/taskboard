@@ -8,6 +8,7 @@ import { useAuth } from '../auth/AuthContext';
 import { Avatar } from '../components/Avatar';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { formatRelative, todayIso } from '../lib/dates';
+import { usePageTitle } from '../lib/usePageTitle';
 import { queryKeys } from '../lib/queryKeys';
 
 /**
@@ -48,6 +49,7 @@ export function MembersPage() {
   });
   const loadFor = (userId: string) => workload.data?.find((w) => w.userId === userId);
 
+  usePageTitle(workspace.data ? `Members · ${workspace.data.name}` : 'Members');
   const myRole = workspace.data?.role ?? 'member';
   const canManage = myRole !== 'member';
 

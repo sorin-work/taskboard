@@ -8,6 +8,7 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { StarButton } from '../components/StarButton';
 import { todayIso } from '../lib/dates';
 import { lastWorkspace } from '../lib/lastWorkspace';
+import { usePageTitle } from '../lib/usePageTitle';
 import { queryKeys } from '../lib/queryKeys';
 
 export function WorkspacePage() {
@@ -17,6 +18,7 @@ export function WorkspacePage() {
     queryKey: queryKeys.workspace(workspaceId),
     queryFn: () => workspacesApi.get(workspaceId),
   });
+  usePageTitle(workspace.data?.name);
   const boards = useQuery({
     queryKey: queryKeys.boards(workspaceId, showArchived),
     queryFn: () => boardsApi.list(workspaceId, showArchived, todayIso()),
