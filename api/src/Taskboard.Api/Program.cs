@@ -5,18 +5,9 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Taskboard.Api.Auth;
 using Taskboard.Api.Common;
 using Taskboard.Api.Data;
+using Taskboard.Api.Features;
 using Taskboard.Api.Features.Activity;
-using Taskboard.Api.Features.Auth;
-using Taskboard.Api.Features.Boards;
-using Taskboard.Api.Features.Cards;
-using Taskboard.Api.Features.Checklists;
-using Taskboard.Api.Features.Comments;
-using Taskboard.Api.Features.Export;
-using Taskboard.Api.Features.Health;
 using Taskboard.Api.Features.Invitations;
-using Taskboard.Api.Features.Labels;
-using Taskboard.Api.Features.MyTasks;
-using Taskboard.Api.Features.Search;
 using Taskboard.Api.Features.Workspaces;
 using Taskboard.Api.Seeding;
 
@@ -79,21 +70,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapHealthEndpoints();
-app.MapAuthEndpoints();
-app.MapWorkspaceEndpoints();
-app.MapMemberEndpoints();
-app.MapInvitationEndpoints();
-app.MapBoardEndpoints();
-app.MapColumnEndpoints();
-app.MapCardEndpoints();
-app.MapLabelEndpoints();
-app.MapChecklistEndpoints();
-app.MapCommentEndpoints();
-app.MapActivityEndpoints();
-app.MapMyTasksEndpoints();
-app.MapSearchEndpoints();
-app.MapExportEndpoints();
+app.MapTaskboardEndpoints();
 
 await app.RunAsync();
 
