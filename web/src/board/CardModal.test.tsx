@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Board, Card } from '../api/types';
@@ -76,6 +76,23 @@ describe('CardModal', () => {
     await userEvent.clear(title);
     await userEvent.type(title, 'Write the release notes{Enter}');
 
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'PUT')).toBe(true),
+    );
+  });
+
+  it('waits for a full year before saving a typed due date', async () => {
+    const fetchMock = mockApi({
+      ...cardRoutes,
+      'PUT /api/cards/c1': () => ({ body: { ...card, dueDate: '2026-05-01' } }),
+    });
+    renderWithProviders(<CardModal board={board} cardId="c1" onClose={() => {}} />);
+
+    const due = await screen.findByLabelText('Due date');
+    fireEvent.change(due, { target: { value: '0002-05-01' } });
+    expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'PUT')).toBe(false);
+
+    fireEvent.change(due, { target: { value: '2026-05-01' } });
     await waitFor(() =>
       expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'PUT')).toBe(true),
     );

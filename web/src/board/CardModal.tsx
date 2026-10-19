@@ -230,7 +230,13 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
               id="card-due"
               type="date"
               value={card.dueDate ?? ''}
-              onChange={(e) => update.mutate({ dueDate: e.target.value || null })}
+              onChange={(e) => {
+                // While someone types the year, some browsers report dates like 0002-05-01.
+                const value = e.target.value;
+                if (!value || value >= '2000-01-01') {
+                  update.mutate({ dueDate: value || null });
+                }
+              }}
             />
             {card.dueDate && (
               <button type="button" onClick={() => update.mutate({ dueDate: null })}>
