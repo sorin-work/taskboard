@@ -174,6 +174,22 @@ Roles: members can do everything with cards, columns, labels and comments;
 admins can also invite people, change roles, and archive or delete boards;
 owners can additionally delete the workspace and promote other owners.
 
+### Database migrations
+
+Migrations live in `api/src/Taskboard.Api/Data/Migrations`. After changing an
+entity or its configuration:
+
+```bash
+cd api
+dotnet tool restore
+dotnet ef migrations add DescribeTheChange -p src/Taskboard.Api -o Data/Migrations
+dotnet ef database update -p src/Taskboard.Api
+```
+
+The tests build their SQLite schema straight from the model, so they don't
+need a migration to pass. CI doesn't check that one exists either; look at
+the generated snapshot diff before committing.
+
 ## Configuration
 
 The api reads standard ASP.NET Core configuration: `appsettings.json`, then
