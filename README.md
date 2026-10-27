@@ -233,3 +233,29 @@ entry, with the request id that's also returned in the `X-Request-Id` header.
 cd api && dotnet test
 cd web && npm test
 ```
+
+## Project layout
+
+```
+api/
+  src/Taskboard.Api/
+    Auth/                 jwt options, token service, current user helpers
+    Common/               problem details, validation filter, rate limits, request ids
+    Data/                 DbContext, entity configurations, Migrations/
+    Domain/               entities (User, Workspace, Board, Card, ...)
+    Features/             one folder per area: endpoints, DTOs, validators
+    Seeding/              demo data
+  tests/Taskboard.Api.Tests/
+    Infrastructure/       WebApplicationFactory on SQLite, test helpers
+    Features/             api tests per area
+web/
+  src/
+    api/                  fetch client and one module per api area
+    auth/                 auth context and route guards
+    board/                columns, card tiles, card dialog, panels
+    components/           shared UI (layout, modal, avatar, ...)
+    lib/                  plain logic with tests (ordering, dates, filters, ...)
+    pages/                one component per route
+  nginx.conf              serves the app and proxies /api in docker
+docker-compose.yml        db, api and web
+```
