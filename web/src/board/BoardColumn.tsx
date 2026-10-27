@@ -41,7 +41,10 @@ export function BoardColumn({
   onToggleCollapsed,
 }: BoardColumnProps) {
   const listRef = useRef<HTMLOListElement>(null);
-  const [dropAt, setDropAt] = useState<number | null>(null);
+  const [hoverAt, setDropAt] = useState<number | null>(null);
+  // A drag cancelled with Escape (or dropped outside the board) never fires
+  // dragleave on this column, so only show the indicator while a drag is on.
+  const dropAt = draggingId ? hoverAt : null;
 
   function indexFor(event: DragEvent) {
     const tiles = Array.from(
