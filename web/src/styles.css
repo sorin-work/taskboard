@@ -1544,3 +1544,13 @@ mark {
   padding: 0.25rem 0.7rem;
   font-size: 0.85rem;
 }
+
+/* Keyboard focus: visible for keyboard users, not after every mouse click. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.card-tile:focus-visible {
+  outline-offset: 0;
+}
