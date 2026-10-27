@@ -1,21 +1,13 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { cardsApi } from '../api/cards';
 import type { Card, Checklist } from '../api/types';
 import { ErrorMessage } from '../components/ErrorMessage';
-import { queryKeys } from '../lib/queryKeys';
-
-function useRefreshCard(card: Card) {
-  const queryClient = useQueryClient();
-  return () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.card(card.id) });
-    queryClient.invalidateQueries({ queryKey: ['boards', card.boardId, 'cards'] });
-  };
-}
+import { useRefreshCard } from './useRefreshCard';
 
 export function ChecklistSection({ card }: { card: Card }) {
-  const refresh = useRefreshCard(card);
+  const refresh = useRefreshCard(card.boardId, card.id);
   const [title, setTitle] = useState('');
   const [adding, setAdding] = useState(false);
   const add = useMutation({
@@ -65,7 +57,7 @@ export function ChecklistSection({ card }: { card: Card }) {
 }
 
 export function ChecklistView({ card, checklist }: { card: Card; checklist: Checklist }) {
-  const refresh = useRefreshCard(card);
+  const refresh = useRefreshCard(card.boardId, card.id);
   const [text, setText] = useState('');
   const done = checklist.items.filter((i) => i.done).length;
   const total = checklist.items.length;

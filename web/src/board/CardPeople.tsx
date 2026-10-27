@@ -5,6 +5,7 @@ import { Avatar } from '../components/Avatar';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { LabelChip } from '../components/LabelChip';
 import { queryKeys } from '../lib/queryKeys';
+import { useRefreshCard } from './useRefreshCard';
 
 function toggle(ids: string[], id: string): string[] {
   return ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id];
@@ -12,12 +13,12 @@ function toggle(ids: string[], id: string): string[] {
 
 function useCardSetter(board: Board, card: Card, fn: (ids: string[]) => Promise<Card>) {
   const queryClient = useQueryClient();
+  const refreshCard = useRefreshCard(board.id, card.id);
   return useMutation({
     mutationFn: fn,
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKeys.card(card.id), updated);
-      queryClient.invalidateQueries({ queryKey: ['boards', board.id, 'cards'] });
-      queryClient.invalidateQueries({ queryKey: queryKeys.cardActivity(card.id) });
+      refreshCard();
     },
   });
 }

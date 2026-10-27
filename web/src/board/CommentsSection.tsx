@@ -9,6 +9,7 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { RichText } from '../components/RichText';
 import { formatRelative } from '../lib/dates';
 import { queryKeys } from '../lib/queryKeys';
+import { useRefreshCard } from './useRefreshCard';
 
 export function CommentsSection({ card, role }: { card: Card; role: Role }) {
   const queryClient = useQueryClient();
@@ -18,10 +19,10 @@ export function CommentsSection({ card, role }: { card: Card; role: Role }) {
     queryFn: () => cardsApi.comments(card.id),
   });
 
+  const refreshCard = useRefreshCard(card.boardId, card.id);
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: queryKeys.comments(card.id) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.cardActivity(card.id) });
-    queryClient.invalidateQueries({ queryKey: ['boards', card.boardId, 'cards'] });
+    refreshCard();
   };
 
   const add = useMutation({

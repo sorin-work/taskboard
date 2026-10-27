@@ -13,6 +13,7 @@ import { queryKeys } from '../lib/queryKeys';
 import { ActivityList } from './ActivityList';
 import { AssigneePicker, LabelPicker } from './CardPeople';
 import { ChecklistSection } from './ChecklistSection';
+import { useRefreshCard } from './useRefreshCard';
 import { CommentsSection } from './CommentsSection';
 
 interface CardModalProps {
@@ -39,9 +40,10 @@ function CardDetails({ board, card, onClose }: { board: Board; card: Card; onClo
   const [description, setDescription] = useState(card.description);
   const [editingDescription, setEditingDescription] = useState(false);
 
+  const refreshCard = useRefreshCard(board.id, card.id);
+  // The card query itself is updated from the response, so only refresh the rest.
   const refreshBoard = () => {
-    queryClient.invalidateQueries({ queryKey: ['boards', board.id, 'cards'] });
-    queryClient.invalidateQueries({ queryKey: queryKeys.cardActivity(card.id) });
+    refreshCard();
   };
 
   const update = useMutation({
