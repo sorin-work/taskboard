@@ -4,6 +4,11 @@ Kanban boards for small teams. Put your team in a workspace, give everyone a
 role, and keep work moving across boards with cards, checklists, comments and
 due dates. "My tasks" collects everything assigned to you in one list.
 
+It's aimed at teams of a handful to a few dozen people who want something
+simpler than a full project management suite: no sprints, story points or
+gantt charts, just boards that everyone can see and move things on. It's
+self-hosted with one `docker compose up`.
+
 ## Features
 
 - **Workspaces and roles**: owners, admins and members; invite people by email
