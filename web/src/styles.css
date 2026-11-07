@@ -238,6 +238,16 @@ button:disabled {
   gap: 0.75rem;
 }
 
+.topbar button {
+  background: transparent;
+  border-color: #3d4760;
+  color: #fff;
+}
+
+.topbar button:hover {
+  background: #2c3548;
+}
+
 .content {
   flex: 1;
   padding: 1.5rem;
