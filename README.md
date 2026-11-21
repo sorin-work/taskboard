@@ -9,6 +9,8 @@ simpler than a full project management suite: no sprints, story points or
 gantt charts, just boards that everyone can see and move things on. It's
 self-hosted with one `docker compose up`.
 
+Ideas for later, nothing promised, are in [ROADMAP.md](ROADMAP.md).
+
 ## Features
 
 - **Workspaces and roles**: owners, admins and members; invite people by email
